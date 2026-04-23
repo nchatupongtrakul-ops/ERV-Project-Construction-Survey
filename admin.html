@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard สรุปผล ERV</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap');
+        body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
+    </style>
+</head>
+<body class="p-8">
+    <div class="max-w-6xl mx-auto space-y-6">
+        <h1 class="text-2xl font-bold">ข้อมูลการประเมินการติดตั้ง ERV</h1>
+        <div id="stats" class="grid grid-cols-2 gap-4">
+            <div class="bg-white p-6 rounded-xl shadow">
+                <p class="text-sm text-gray-500">จำนวนทั้งหมด</p>
+                <h2 id="total" class="text-3xl font-bold">0</h2>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow">
+                <p class="text-sm text-gray-500">คะแนนเฉลี่ย</p>
+                <h2 id="avg" class="text-3xl font-bold">0.0</h2>
+            </div>
+        </div>
+        <div class="bg-white rounded-xl shadow overflow-hidden">
+            <table class="w-full text-left">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="p-4 text-xs font-semibold uppercase">วัน/เวลา</th>
+                        <th class="p-4 text-xs font-semibold uppercase">ลูกค้า</th>
+                        <th class="p-4 text-xs font-semibold uppercase">เฉลี่ย</th>
+                        <th class="p-4 text-xs font-semibold uppercase">ความเห็น</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody" class="divide-y divide-gray-100"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'erv-survey-app';
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'surveys'), (snapshot) => {
+                    const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+                        .sort((a, b) => (b.submitted_at?.seconds || 0) - (a.submitted_at?.seconds || 0));
+                    
+                    document.getElementById('total').innerText = data.length;
+                    let totalAvg = 0;
+                    const tbody = document.getElementById('tableBody');
+                    tbody.innerHTML = '';
+
+                    data.forEach(item => {
+                        const vals = Object.values(item.ratings || {});
+                        const avg = vals.length ? (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1) : 0;
+                        totalAvg += parseFloat(avg);
+                        const date = item.submitted_at ? new Date(item.submitted_at.seconds * 1000).toLocaleString('th-TH') : '-';
+                        tbody.innerHTML += `
+                            <tr>
+                                <td class="p-4 text-xs text-gray-400">${date}</td>
+                                <td class="p-4 font-medium">${item.customer_name}</td>
+                                <td class="p-4"><span class="bg-yellow-100 px-2 py-1 rounded text-xs font-bold">${avg}</span></td>
+                                <td class="p-4 text-gray-500 text-sm italic">${item.feedback || '-'}</td>
+                            </tr>
+                        `;
+                    });
+                    document.getElementById('avg').innerText = data.length ? (totalAvg / data.length).toFixed(1) : "0.0";
+                });
+            }
+        });
+
+        const init = async () => { 
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) await signInWithCustomToken(auth, __initial_auth_token);
+            else await signInAnonymously(auth);
+        };
+        init();
+    </script>
+</body>
+</html>
