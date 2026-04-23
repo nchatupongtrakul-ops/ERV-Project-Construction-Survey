@@ -3,97 +3,280 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>แบบสอบถามความพึงพอใจการติดตั้งระบบ ERV</title>
+    <title>ระบบประเมินความพึงพอใจการติดตั้ง ERV</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap');
-        body { font-family: 'Kanit', sans-serif; background-color: #f0f4f8; }
+        body { font-family: 'Kanit', sans-serif; }
         .star-rating { display: flex; flex-direction: row-reverse; justify-content: flex-end; }
         .star-rating input { display: none; }
-        .star-rating label { font-size: 2.2rem; color: #ddd; cursor: pointer; padding: 0 0.15rem; transition: all 0.2s ease; }
+        .star-rating label { font-size: 2rem; color: #ddd; cursor: pointer; transition: 0.2s; }
         .star-rating input:checked ~ label { color: #fbbf24; }
-        .star-rating label:hover, .star-rating label:hover ~ label { color: #fcd34d; transform: scale(1.1); }
-        .fade-in { animation: fadeIn 0.5s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-        .loading-spinner { border: 3px solid rgba(255,255,255,.3); border-radius: 50%; border-top-color: #fff; width: 1.5rem; height: 1.5rem; animation: spin 1s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        .star-rating label:hover, .star-rating label:hover ~ label { color: #fcd34d; }
     </style>
 </head>
-<body class="p-4 min-h-screen flex flex-col items-center justify-center">
-    <div class="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden fade-in">
-        <div class="bg-gradient-to-br from-blue-600 to-blue-800 p-8 text-white text-center">
-            <h1 class="text-2xl font-bold">แบบประเมินการติดตั้ง ERV</h1>
-            <p class="text-blue-100 text-sm mt-2">ขอบพระคุณที่ไว้วางใจใช้บริการของเรา</p>
+<body class="bg-slate-50 min-h-screen">
+
+    <nav class="bg-blue-600 p-4 text-white shadow-md mb-6">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <h1 class="font-bold">ERV Service System</h1>
+            <div class="flex gap-4 text-sm font-light">
+                <button onclick="window.switchPage('survey')" class="hover:bg-blue-700 px-3 py-1 rounded-lg transition">หน้าประเมิน</button>
+                <button onclick="window.openAdminAuth()" class="hover:bg-blue-700 px-3 py-1 rounded-lg transition border border-blue-400">หน้าแอดมิน</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ส่วนที่ 1: แบบฟอร์มประเมิน (สำหรับลูกค้า) -->
+    <div id="surveyPage" class="max-w-md mx-auto p-4">
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+            <div class="bg-blue-700 p-6 text-white text-center">
+                <h2 class="text-xl font-bold">แบบประเมินการติดตั้ง</h2>
+                <p class="text-blue-100 text-xs mt-1">ช่วยเราพัฒนาบริการให้ดียิ่งขึ้น</p>
+            </div>
+            <form id="surveyForm" class="p-6 space-y-5">
+                <input type="text" id="custName" required placeholder="ชื่อลูกค้า / โครงการ" class="w-full p-3 bg-gray-50 border rounded-xl outline-none focus:border-blue-500">
+                
+                <div class="space-y-2 border-b pb-4">
+                    <p class="text-sm font-medium text-gray-700">1. คุณภาพการติดตั้งและความเรียบร้อย</p>
+                    <div class="star-rating">
+                        <input type="radio" id="s1-5" name="q1" value="5" required><label for="s1-5" class="fas fa-star"></label>
+                        <input type="radio" id="s1-4" name="q1" value="4"><label for="s1-4" class="fas fa-star"></label>
+                        <input type="radio" id="s1-3" name="q1" value="3"><label for="s1-3" class="fas fa-star"></label>
+                        <input type="radio" id="s1-2" name="q1" value="2"><label for="s1-2" class="fas fa-star"></label>
+                        <input type="radio" id="s1-1" name="q1" value="1"><label for="s1-1" class="fas fa-star"></label>
+                    </div>
+                </div>
+
+                <div class="space-y-2 border-b pb-4">
+                    <p class="text-sm font-medium text-gray-700">2. การแนะนำการใช้งานและการดูแลรักษา</p>
+                    <div class="star-rating">
+                        <input type="radio" id="s2-5" name="q2" value="5" required><label for="s2-5" class="fas fa-star"></label>
+                        <input type="radio" id="s2-4" name="q2" value="4"><label for="s2-4" class="fas fa-star"></label>
+                        <input type="radio" id="s2-3" name="q2" value="3"><label for="s2-3" class="fas fa-star"></label>
+                        <input type="radio" id="s2-2" name="q2" value="2"><label for="s2-2" class="fas fa-star"></label>
+                        <input type="radio" id="s2-1" name="q2" value="1"><label for="s2-1" class="fas fa-star"></label>
+                    </div>
+                </div>
+
+                <textarea id="feedback" placeholder="ข้อเสนอแนะเพิ่มเติม (ถ้ามี)..." class="w-full p-3 bg-gray-50 border rounded-xl outline-none focus:border-blue-500" rows="3"></textarea>
+                
+                <button type="submit" id="submitBtn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition shadow-lg active:scale-95">
+                    ส่งแบบประเมิน
+                </button>
+            </form>
+            <div id="successMsg" class="hidden p-10 text-center">
+                <i class="fas fa-check-circle text-green-500 text-5xl mb-4"></i>
+                <h3 class="font-bold text-lg">ขอบพระคุณสำหรับข้อมูล!</h3>
+                <p class="text-gray-500 text-sm mt-2">เราได้รับข้อมูลของคุณเรียบร้อยแล้ว</p>
+                <button onclick="location.reload()" class="mt-6 text-blue-600 font-medium">กลับหน้าหลัก</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ส่วนที่ 2: หน้าแดชบอร์ด (สำหรับแอดมิน) -->
+    <div id="adminPage" class="hidden max-w-5xl mx-auto p-4 space-y-6">
+        <div class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+            <h2 class="font-bold text-gray-700 flex items-center">
+                <i class="fas fa-chart-bar mr-2 text-blue-600"></i> รายงานสรุปผล
+            </h2>
+            <button onclick="window.switchPage('survey')" class="text-sm text-red-500 hover:bg-red-50 px-3 py-1 rounded-lg transition">ออกจากระบบ</button>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 text-center">
+                <p class="text-xs text-gray-400 font-bold uppercase tracking-wider">จำนวนผู้ประเมิน</p>
+                <h4 id="totalCount" class="text-4xl font-bold text-blue-600 mt-2">0</h4>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 text-center">
+                <p class="text-xs text-gray-400 font-bold uppercase tracking-wider">คะแนนเฉลี่ยรวม</p>
+                <h4 id="avgScore" class="text-4xl font-bold text-yellow-500 mt-2">0.0</h4>
+            </div>
         </div>
 
-        <form id="surveyForm" class="p-6 space-y-6">
-            <div class="space-y-4">
-                <input type="text" name="customer_name" required placeholder="ชื่อลูกค้า / ชื่อโครงการ" class="w-full px-4 py-3 bg-gray-50 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
-                <input type="text" name="job_id" placeholder="หมายเลข Job ID (ถ้ามี)" class="w-full px-4 py-3 bg-gray-50 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-gray-50 text-gray-500 text-[10px] uppercase font-bold">
+                        <tr>
+                            <th class="p-4">วัน-เวลา</th>
+                            <th class="p-4">ชื่อลูกค้า</th>
+                            <th class="p-4">คะแนนเฉลี่ย</th>
+                            <th class="p-4">ข้อเสนอแนะ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminTable" class="text-sm divide-y divide-gray-50">
+                        <tr><td colspan="4" class="p-10 text-center text-gray-400 italic">กำลังดึงข้อมูลล่าสุด...</td></tr>
+                    </tbody>
+                </table>
             </div>
+        </div>
+    </div>
 
-            <div class="space-y-4">
-                <label class="text-sm font-medium text-gray-700">1. คุณภาพงานติดตั้ง</label>
-                <div class="star-rating"><input type="radio" id="q1-5" name="q1" value="5" required><label for="q1-5" class="fas fa-star"></label><input type="radio" id="q1-4" name="q1" value="4"><label for="q1-4" class="fas fa-star"></label><input type="radio" id="q1-3" name="q1" value="3"><label for="q1-3" class="fas fa-star"></label><input type="radio" id="q1-2" name="q1" value="2"><label for="q1-2" class="fas fa-star"></label><input type="radio" id="q1-1" name="q1" value="1"><label for="q1-1" class="fas fa-star"></label></div>
-                
-                <label class="text-sm font-medium text-gray-700">2. ความสะอาดหน้างาน</label>
-                <div class="star-rating"><input type="radio" id="q2-5" name="q2" value="5" required><label for="q2-5" class="fas fa-star"></label><input type="radio" id="q2-4" name="q2" value="4"><label for="q2-4" class="fas fa-star"></label><input type="radio" id="q2-3" name="q2" value="3"><label for="q2-3" class="fas fa-star"></label><input type="radio" id="q2-2" name="q2" value="2"><label for="q2-2" class="fas fa-star"></label><input type="radio" id="q2-1" name="q2" value="1"><label for="q2-1" class="fas fa-star"></label></div>
+    <!-- Modal สำหรับกรอกรหัสผ่าน -->
+    <div id="authModal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+        <div class="bg-white rounded-3xl p-8 w-full max-w-xs shadow-2xl">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-lock fa-lg"></i>
+                </div>
+                <h3 class="font-bold text-xl">Admin Access</h3>
+                <p class="text-gray-400 text-xs mt-1">กรุณาใส่รหัสผ่านเพื่อเข้าถึงข้อมูล</p>
             </div>
-
-            <textarea name="feedback" rows="3" placeholder="ข้อเสนอแนะเพิ่มเติม..." class="w-full px-4 py-3 bg-gray-50 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500"></textarea>
-
-            <button type="submit" id="submitBtn" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg flex items-center justify-center">ส่งแบบประเมิน</button>
-        </form>
-
-        <div id="successMsg" class="hidden p-12 text-center space-y-4">
-            <i class="fas fa-check-circle text-green-500 text-6xl"></i>
-            <h2 class="text-2xl font-bold">ส่งข้อมูลสำเร็จ!</h2>
-            <p class="text-gray-500">ขอบพระคุณสำหรับข้อมูลครับ</p>
+            <input type="password" id="adminPassword" placeholder="Password" class="w-full p-4 border rounded-2xl mb-4 outline-none focus:ring-2 focus:ring-blue-500 text-center font-bold tracking-widest bg-gray-50">
+            <div class="flex flex-col gap-2">
+                <button onclick="window.checkAdminAuth()" class="w-full py-4 bg-blue-600 text-white rounded-2xl font-bold shadow-lg hover:bg-blue-700 transition">เข้าสู่ระบบ</button>
+                <button onclick="window.closeAuthModal()" class="w-full py-2 text-gray-400 text-sm hover:text-gray-600 transition">ยกเลิก</button>
+            </div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = JSON.parse(__firebase_config);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'erv-quality-survey-v1';
-
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'erv-fixed-system-2024'; 
+        
         const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
         const db = getFirestore(app);
+        const auth = getAuth(app);
 
-        let user = null;
-        onAuthStateChanged(auth, u => user = u);
-        const init = async () => { 
-            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) await signInWithCustomToken(auth, __initial_auth_token);
-            else await signInAnonymously(auth);
+        let userUid = null;
+        const ADMIN_CODE = "Coral789"; 
+
+        // ฟังก์ชันจัดการ UI (ผูกกับ window เพื่อให้ HTML เรียกใช้ได้)
+        window.switchPage = (page) => {
+            document.getElementById('surveyPage').classList.toggle('hidden', page !== 'survey');
+            document.getElementById('adminPage').classList.toggle('hidden', page !== 'admin');
+            if (page === 'admin') window.scrollTo({ top: 0, behavior: 'smooth' });
         };
-        init();
 
+        window.openAdminAuth = () => {
+            document.getElementById('authModal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('adminPassword').focus(), 100);
+        };
+
+        window.closeAuthModal = () => {
+            document.getElementById('authModal').classList.add('hidden');
+            document.getElementById('adminPassword').value = '';
+        };
+
+        window.checkAdminAuth = () => {
+            const input = document.getElementById('adminPassword').value;
+            if (input === ADMIN_CODE) {
+                window.closeAuthModal();
+                window.switchPage('admin');
+            } else {
+                alert("รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง");
+                document.getElementById('adminPassword').value = '';
+                document.getElementById('adminPassword').focus();
+            }
+        };
+
+        // ตรวจสอบการกด Enter
+        document.getElementById('adminPassword').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') window.checkAdminAuth();
+        });
+
+        // ระบบ Firebase
+        let unsubscribeAdmin = null;
+        function loadAdminData(user) {
+            if (!user) return;
+            const surveyCol = collection(db, 'artifacts', appId, 'public', 'data', 'surveys');
+            
+            if (unsubscribeAdmin) unsubscribeAdmin();
+
+            unsubscribeAdmin = onSnapshot(surveyCol, (snapshot) => {
+                const docs = snapshot.docs.map(doc => doc.data())
+                             .sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+                
+                let totalScoreSum = 0;
+                const table = document.getElementById('adminTable');
+                table.innerHTML = '';
+
+                if (docs.length === 0) {
+                    table.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-gray-400">ยังไม่มีข้อมูลการประเมิน</td></tr>';
+                    return;
+                }
+
+                docs.forEach(data => {
+                    const r = data.ratings || {};
+                    const q1 = r.q1 || 0;
+                    const q2 = r.q2 || 0;
+                    const avg = ((q1 + q2) / 2).toFixed(1);
+                    totalScoreSum += parseFloat(avg);
+                    const date = data.timestamp ? new Date(data.timestamp.seconds * 1000).toLocaleString('th-TH') : 'รอการประมวลผล...';
+                    
+                    table.innerHTML += `
+                        <tr class="hover:bg-blue-50 transition-colors">
+                            <td class="p-4 text-[10px] text-gray-400 border-b border-gray-50">${date}</td>
+                            <td class="p-4 font-bold text-gray-700 border-b border-gray-50">${data.cust_name || 'ไม่ระบุชื่อ'}</td>
+                            <td class="p-4 border-b border-gray-50"><span class="bg-yellow-100 text-yellow-700 font-bold px-2 py-1 rounded text-xs inline-flex items-center"><i class="fas fa-star mr-1"></i> ${avg}</span></td>
+                            <td class="p-4 text-gray-500 text-xs border-b border-gray-50 truncate max-w-[150px] md:max-w-xs" title="${data.feedback || ''}">${data.feedback || '-'}</td>
+                        </tr>`;
+                });
+
+                document.getElementById('totalCount').innerText = docs.length;
+                document.getElementById('avgScore').innerText = docs.length ? (totalScoreSum / docs.length).toFixed(1) : "0.0";
+            }, (error) => {
+                console.error("Firestore Listener Error:", error);
+            });
+        }
+
+        const initAuth = async () => {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Auth Error:", error);
+            }
+        };
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                userUid = user.uid;
+                loadAdminData(user);
+            }
+        });
+
+        initAuth();
+
+        // จัดการการส่งฟอร์ม
         const form = document.getElementById('surveyForm');
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (!user) return;
-            
-            const btn = document.getElementById('submitBtn');
-            btn.disabled = true;
-            btn.innerHTML = '<div class="loading-spinner"></div>';
+            if (!userUid) return alert("กำลังเชื่อมต่อเซิร์ฟเวอร์ กรุณาลองใหม่ใน 1-2 วินาที");
 
-            const formData = new FormData(form);
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner animate-spin"></i> กำลังส่งข้อมูล...';
+
             try {
-                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'surveys'), {
-                    customer_name: formData.get('customer_name'),
-                    job_id: formData.get('job_id'),
-                    ratings: { q1: parseInt(formData.get('q1')), q2: parseInt(formData.get('q2')) },
-                    feedback: formData.get('feedback'),
-                    submitted_at: serverTimestamp()
+                const surveyCol = collection(db, 'artifacts', appId, 'public', 'data', 'surveys');
+                await addDoc(surveyCol, {
+                    cust_name: document.getElementById('custName').value.trim(),
+                    ratings: { 
+                        q1: parseInt(form.q1.value), 
+                        q2: parseInt(form.q2.value) 
+                    },
+                    feedback: document.getElementById('feedback').value.trim(),
+                    timestamp: serverTimestamp(),
+                    userId: userUid
                 });
                 form.classList.add('hidden');
                 document.getElementById('successMsg').classList.remove('hidden');
-            } catch (err) { console.error(err); btn.disabled = false; btn.innerText = "ส่งแบบประเมิน"; }
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } catch (err) {
+                alert("ไม่สามารถส่งข้อมูลได้: " + err.message);
+                submitBtn.disabled = false;
+                submitBtn.innerText = "ส่งแบบประเมิน";
+            }
         });
     </script>
 </body>
