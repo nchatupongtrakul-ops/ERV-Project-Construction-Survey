@@ -120,7 +120,7 @@
   .chip.sel { border-color: var(--blue); background: var(--blue-light); color: var(--blue); font-weight: 600; }
   .chip.sel-no { border-color: var(--red); background: var(--red-light); color: var(--red); font-weight: 600; }
 
-  /* Textarea & Input */
+  /* Input Fields */
   .input-field {
     width: 100%; border: 1.5px solid var(--gray-300); border-radius: var(--radius-sm);
     padding: 10px 14px; font-size: 14px; font-family: 'Sarabun', sans-serif;
@@ -137,9 +137,6 @@
   .submit-btn:hover { background: #155fa0; }
   .submit-btn:disabled { background: var(--gray-300); cursor: not-allowed; }
 
-  /* Success */
-  .success-card { background: white; border-radius: var(--radius); box-shadow: var(--shadow-lg); padding: 3rem 2rem; text-align: center; }
-
   /* Dashboard */
   .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 1.5rem; }
   .metric { background: white; border-radius: var(--radius); box-shadow: var(--shadow); padding: 1.25rem; }
@@ -152,15 +149,10 @@
   .resp-card.lo { border-left-color: var(--red); }
   .resp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 13px; margin-top: 10px; }
 
-  /* Auth Modal */
+  /* Modal */
   .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
   .modal.active { display: flex; }
   .modal-content { background: white; padding: 2rem; border-radius: 20px; width: 100%; max-width: 320px; text-align: center; }
-
-  @media (max-width: 600px) {
-    .nav-logo span { display: none; }
-    .resp-grid { grid-template-columns: 1fr; }
-  }
 </style>
 </head>
 <body>
@@ -169,8 +161,8 @@
   <div class="nav-inner">
     <div class="nav-logo">💨 ERV Service</div>
     <div class="flex">
-        <button class="tab-btn active" id="btn-survey" onclick="switchTab('survey')">หน้าประเมิน</button>
-        <button class="tab-btn" id="btn-dashboard" onclick="openAuth()">รีวิวคำตอบ</button>
+        <button class="tab-btn active" id="btn-survey">หน้าประเมิน</button>
+        <button class="tab-btn" id="btn-dashboard">รีวิวคำตอบ (Admin)</button>
     </div>
   </div>
 </nav>
@@ -184,7 +176,7 @@
           <div class="survey-header">
             <div class="icon">💨</div>
             <h1>แบบสอบถามความพึงพอใจ<br>การติดตั้งระบบ ERV</h1>
-            <p>ความคิดเห็นของคุณจะถูกนำไปพัฒนาคุณภาพการบริการ</p>
+            <p>ความคิดเห็นของคุณสำคัญต่อเรา</p>
           </div>
           <div class="survey-body">
             <div class="q-block">
@@ -194,32 +186,32 @@
 
             <div class="q-block">
               <span class="q-label"><span class="q-num">1.</span> ความพึงพอใจโดยรวม</span>
-              <div class="star-row">
-                <div class="star" onclick="rateStar(1)">⭐</div>
-                <div class="star" onclick="rateStar(2)">⭐</div>
-                <div class="star" onclick="rateStar(3)">⭐</div>
-                <div class="star" onclick="rateStar(4)">⭐</div>
-                <div class="star" onclick="rateStar(5)">⭐</div>
+              <div class="star-row" id="star-container">
+                <div class="star" data-v="1">⭐</div>
+                <div class="star" data-v="2">⭐</div>
+                <div class="star" data-v="3">⭐</div>
+                <div class="star" data-v="4">⭐</div>
+                <div class="star" data-v="5">⭐</div>
               </div>
               <div class="star-hint" id="starHint">แตะดาวเพื่อให้คะแนน</div>
             </div>
 
             <div class="q-block">
               <span class="q-label"><span class="q-num">2.</span> ความเป็นมืออาชีพของทีมงาน</span>
-              <div class="chip-row" id="q2">
-                <button class="chip" onclick="pick('q2','มืออาชีพมาก',this)">มืออาชีพมาก</button>
-                <button class="chip" onclick="pick('q2','ค่อนข้างดี',this)">ค่อนข้างดี</button>
-                <button class="chip" onclick="pick('q2','ปานกลาง',this)">ปานกลาง</button>
-                <button class="chip" onclick="pick('q2','ควรปรับปรุง',this,'sel-no')">ควรปรับปรุง</button>
+              <div class="chip-row" id="q2-row">
+                <button class="chip" data-val="มืออาชีพมาก">มืออาชีพมาก</button>
+                <button class="chip" data-val="ค่อนข้างดี">ค่อนข้างดี</button>
+                <button class="chip" data-val="ปานกลาง">ปานกลาง</button>
+                <button class="chip" data-val="ควรปรับปรุง" data-cls="sel-no">ควรปรับปรุง</button>
               </div>
             </div>
 
             <div class="q-block">
               <span class="q-label"><span class="q-num">3.</span> งานติดตั้งเสร็จตรงเวลาหรือไม่?</span>
-              <div class="chip-row" id="q3">
-                <button class="chip" onclick="pick('q3','ตรงเวลา',this)">ตรงเวลา</button>
-                <button class="chip" onclick="pick('q3','ล่าช้าเล็กน้อย',this)">ล่าช้าเล็กน้อย</button>
-                <button class="chip" onclick="pick('q3','ล่าช้ามาก',this,'sel-no')">ล่าช้ามาก</button>
+              <div class="chip-row" id="q3-row">
+                <button class="chip" data-val="ตรงเวลา">ตรงเวลา</button>
+                <button class="chip" data-val="ล่าช้าเล็กน้อย">ล่าช้าเล็กน้อย</button>
+                <button class="chip" data-val="ล่าช้ามาก" data-cls="sel-no">ล่าช้ามาก</button>
               </div>
             </div>
 
@@ -228,16 +220,16 @@
               <textarea id="comment" class="input-field" placeholder="กรุณาแชร์ข้อแนะนำของคุณ..."></textarea>
             </div>
 
-            <button class="submit-btn" id="submitBtn" onclick="submitSurvey()">ส่งแบบสอบถาม ✓</button>
+            <button class="submit-btn" id="submitBtn">ส่งแบบสอบถาม ✓</button>
           </div>
         </div>
       </div>
       <div id="successMsg" style="display:none;">
-        <div class="success-card">
-          <div class="big" style="font-size: 60px;">🎉</div>
+        <div class="survey-card" style="padding: 3rem 2rem; text-align: center;">
+          <div style="font-size: 60px;">🎉</div>
           <h2 style="margin: 15px 0;">ขอบคุณสำหรับความคิดเห็น!</h2>
-          <p style="color: var(--text-muted); margin-bottom: 20px;">เราได้รับข้อมูลเรียบร้อยแล้ว</p>
-          <button class="reset-btn" onclick="location.reload()" style="background: none; border: 2px solid var(--blue); color: var(--blue); padding: 8px 20px; border-radius: 8px; cursor: pointer;">กลับหน้าหลัก</button>
+          <p style="margin-bottom: 20px; color: var(--text-muted);">เราได้รับข้อมูลของคุณเรียบร้อยแล้ว</p>
+          <button onclick="location.reload()" style="background: var(--blue); color: white; border: none; padding: 10px 25px; border-radius: 8px; cursor: pointer;">ทำแบบสอบถามอีกครั้ง</button>
         </div>
       </div>
     </div>
@@ -266,18 +258,18 @@
 <!-- AUTH MODAL -->
 <div id="authModal" class="modal">
     <div class="modal-content">
-        <i class="fas fa-lock" style="font-size: 30px; color: var(--blue); margin-bottom: 15px;"></i>
         <h3 style="margin-bottom: 15px;">Admin Login</h3>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px;">กรุณากรอกรหัสผ่านเพื่อดูสรุปผล</p>
         <input type="password" id="adminPass" class="input-field" style="text-align: center;" placeholder="รหัสผ่าน">
-        <button class="submit-btn" onclick="checkAuth()">ตกลง</button>
-        <button onclick="closeAuth()" style="margin-top: 10px; background: none; border: none; color: var(--gray-500); cursor: pointer; font-size: 13px;">ยกเลิก</button>
+        <button class="submit-btn" id="authConfirm">ตกลง</button>
+        <button id="authCancel" style="margin-top: 10px; background: none; border: none; color: var(--gray-500); cursor: pointer;">ยกเลิก</button>
     </div>
 </div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-  import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-  import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+  import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+  import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
   const firebaseConfig = JSON.parse(__firebase_config);
   const appId = typeof __app_id !== 'undefined' ? __app_id : 'erv-survey-system';
@@ -285,51 +277,77 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
 
-  let user = null;
+  let currentUser = null;
   let state = { star: 0, q2: '', q3: '' };
   const ADMIN_CODE = "Coral789";
 
-  // Auth Functions
-  window.openAuth = () => document.getElementById('authModal').classList.add('active');
-  window.closeAuth = () => document.getElementById('authModal').classList.remove('active');
-  window.checkAuth = () => {
+  // Tab Switching
+  const switchTab = (name) => {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    document.getElementById('btn-' + (name === 'dashboard' ? 'dashboard' : 'survey')).classList.add('active');
+    
+    // Start listening only when dashboard is active AND user is authenticated
+    if(name === 'dashboard' && currentUser) {
+        listenData();
+    }
+  };
+
+  // UI Event Listeners
+  document.getElementById('btn-survey').onclick = () => switchTab('survey');
+  document.getElementById('btn-dashboard').onclick = () => {
+    if (document.getElementById('tab-dashboard').classList.contains('active')) return;
+    document.getElementById('authModal').classList.add('active');
+    document.getElementById('adminPass').focus();
+  };
+  
+  document.getElementById('authCancel').onclick = () => {
+    document.getElementById('authModal').classList.remove('active');
+  };
+
+  document.getElementById('authConfirm').onclick = () => {
     if(document.getElementById('adminPass').value === ADMIN_CODE) {
-        window.closeAuth();
+        document.getElementById('authModal').classList.remove('active');
+        document.getElementById('adminPass').value = '';
         switchTab('dashboard');
     } else {
         alert('รหัสผ่านไม่ถูกต้อง');
     }
   };
 
-  // Tab Logic
-  window.switchTab = (name) => {
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('tab-' + name).classList.add('active');
-    document.getElementById('btn-' + name).classList.add('active');
-    if(name === 'dashboard') listenData();
+  document.getElementById('adminPass').onkeypress = (e) => {
+    if(e.key === 'Enter') document.getElementById('authConfirm').click();
   };
 
-  // Survey Logic
-  window.rateStar = (v) => {
-    state.star = v;
-    document.querySelectorAll('.star').forEach((s, i) => s.classList.toggle('on', i < v));
-    const hints = ['','ต้องปรับปรุง','พอใช้','ปานกลาง','ดีมาก','ยอดเยี่ยม!'];
-    document.getElementById('starHint').textContent = hints[v];
-  };
+  // Survey Interactivity
+  document.querySelectorAll('.star').forEach(el => {
+    el.onclick = () => {
+        const v = parseInt(el.dataset.v);
+        state.star = v;
+        document.querySelectorAll('.star').forEach((s, i) => s.classList.toggle('on', i < v));
+        const hints = ['','ต้องปรับปรุง','พอใช้','ปานกลาง','ดีมาก','ยอดเยี่ยม!'];
+        document.getElementById('starHint').textContent = hints[v];
+    };
+  });
 
-  window.pick = (qid, val, el, cls) => {
-    state[qid] = val;
-    document.querySelectorAll('#' + qid + ' .chip').forEach(b => { b.classList.remove('sel'); b.classList.remove('sel-no'); });
-    el.classList.add(cls || 'sel');
+  const setupChips = (rowId, stateKey) => {
+    document.querySelectorAll(`#${rowId} .chip`).forEach(el => {
+        el.onclick = () => {
+            state[stateKey] = el.dataset.val;
+            document.querySelectorAll(`#${rowId} .chip`).forEach(c => {
+                c.classList.remove('sel', 'sel-no');
+            });
+            el.classList.add(el.dataset.cls || 'sel');
+        };
+    });
   };
+  setupChips('q2-row', 'q2');
+  setupChips('q3-row', 'q3');
 
-  window.submitSurvey = async () => {
-    if (!user) {
-        alert("กำลังเชื่อมต่อระบบ กรุณารอสักครู่...");
-        return;
-    }
-    
+  // Submit Data
+  document.getElementById('submitBtn').onclick = async () => {
+    if(!currentUser) return alert('ระบบกำลังเชื่อมต่อ กรุณารอสักครู่...');
     const name = document.getElementById('custName').value.trim();
     if(!name) return alert('กรุณาระบุชื่อลูกค้า');
     if(!state.star) return alert('กรุณาให้คะแนนดาว');
@@ -339,94 +357,108 @@
     btn.textContent = "กำลังส่ง...";
 
     try {
-        await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'surveys'), {
+        const surveyCol = collection(db, 'artifacts', appId, 'public', 'data', 'surveys');
+        await addDoc(surveyCol, {
             customer_name: name,
             star: state.star,
-            q2: state.q2 || 'ไม่ได้ระบุ',
-            q3: state.q3 || 'ไม่ได้ระบุ',
+            q2_pro: state.q2 || 'ไม่ได้ระบุ',
+            q3_time: state.q3 || 'ไม่ได้ระบุ',
             comment: document.getElementById('comment').value.trim(),
             timestamp: serverTimestamp()
         });
         document.getElementById('surveyFormUI').style.display = 'none';
         document.getElementById('successMsg').style.display = 'block';
     } catch(e) {
-        console.error("Submit Error:", e);
-        alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+        console.error("Submission error:", e);
+        alert('บันทึกข้อมูลไม่สำเร็จ: ' + e.message);
         btn.disabled = false;
         btn.textContent = "ส่งแบบสอบถาม ✓";
     }
   };
 
-  // Data Sync
-  let unsubscribe = null;
+  // Realtime Sync (Dashboard)
+  let unsub = null;
   function listenData() {
-    if(!user) {
-        console.log("Waiting for auth to listen data...");
-        return;
-    }
-    if(unsubscribe) return;
+    // RULE 3: Guard with authentication check
+    if(!currentUser) return;
+    if(unsub) return; // Prevent multiple listeners
+
+    const surveyCol = collection(db, 'artifacts', appId, 'public', 'data', 'surveys');
     
-    const q = collection(db, 'artifacts', appId, 'public', 'data', 'surveys');
-    unsubscribe = onSnapshot(q, (snapshot) => {
-        const data = snapshot.docs.map(doc => doc.data()).sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+    unsub = onSnapshot(surveyCol, (snap) => {
+        const data = snap.docs.map(d => ({id: d.id, ...d.data()}));
+        // RULE 2: Manual sort in JS memory
+        data.sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
         renderDashboard(data);
     }, (err) => {
-        console.error("Firestore Listen Error:", err);
-        document.getElementById('responseList').innerHTML = '<div style="text-align:center; padding: 40px; color: var(--red);">ไม่มีสิทธิ์เข้าถึงข้อมูล หรือเกิดข้อผิดพลาด</div>';
+        console.error("Firestore listen error:", err);
+        document.getElementById('responseList').innerHTML = 
+            `<div style="color:red; text-align:center; padding:20px; background:#fff; border-radius:10px;">
+                ไม่สามารถดึงข้อมูลได้: ${err.message}<br>
+                <small>สถานะสิทธิ์: ${currentUser ? 'ล็อกอินแล้ว' : 'ยังไม่ได้ล็อกอิน'}</small>
+            </div>`;
     });
   }
 
   function renderDashboard(data) {
     const total = data.length;
-    const avg = total ? (data.reduce((s, r) => s + r.star, 0) / total).toFixed(1) : "0.0";
-    
+    const avg = total ? (data.reduce((s, r) => s + (r.star || 0), 0) / total).toFixed(1) : "0.0";
     document.getElementById('m-total').textContent = total;
     document.getElementById('m-avg').textContent = avg;
 
     const list = document.getElementById('responseList');
     if(total === 0) {
-        list.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--gray-500);">ยังไม่มีคำตอบ</div>';
+        list.innerHTML = '<div style="text-align:center; padding:40px; color:#aaa;">ยังไม่มีข้อมูลการประเมินในระบบ</div>';
         return;
     }
 
     list.innerHTML = data.map(r => {
-        const date = r.timestamp ? new Date(r.timestamp.seconds * 1000).toLocaleString('th-TH') : 'เมื่อสักครู่';
-        const cls = r.star >= 4 ? 'hi' : r.star === 3 ? 'mid' : 'lo';
+        const date = r.timestamp ? new Date(r.timestamp.seconds * 1000).toLocaleString('th-TH') : 'กำลังส่ง...';
+        const stars = r.star || 0;
+        const cls = stars >= 4 ? 'hi' : stars === 3 ? 'mid' : 'lo';
         return `
             <div class="resp-card ${cls}">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <strong style="font-size:15px;">${r.customer_name}</strong>
-                    <span style="font-size:11px; color:var(--gray-500);">${date}</span>
+                <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                    <strong>${r.customer_name || 'ลูกค้าไม่ระบุชื่อ'}</strong>
+                    <span style="font-size:11px; color:#888;">${date}</span>
                 </div>
                 <div class="resp-grid">
-                    <div>คะแนน: ${'⭐'.repeat(r.star)} (${r.star}/5)</div>
-                    <div>ความเป็นมืออาชีพ: ${r.q2}</div>
-                    <div>การตรงเวลา: ${r.q3}</div>
+                    <div>คะแนน: ${'⭐'.repeat(stars)}</div>
+                    <div>ทีมงาน: ${r.q2_pro || 'ไม่ได้ระบุ'}</div>
+                    <div>เวลา: ${r.q3_time || 'ไม่ได้ระบุ'}</div>
                 </div>
-                ${r.comment ? `<div style="margin-top:10px; padding-top:10px; border-top:1px solid var(--gray-100); font-style:italic; font-size:13px;">"${r.comment}"</div>` : ''}
+                ${r.comment ? `<div style="margin-top:8px; font-size:13px; font-style:italic; color:var(--gray-700); border-top: 1px dashed #eee; padding-top:5px;">💬 "${r.comment}"</div>` : ''}
             </div>
         `;
     }).join('');
   }
 
-  // Init Auth
-  async function init() {
+  // Firebase Auth Initialization (Follow RULE 3)
+  const initAuth = async () => {
     try {
-        await signInAnonymously(auth);
-        onAuthStateChanged(auth, (u) => {
-            user = u;
-            // Check if dashboard is currently active to start listening
-            if (u && document.getElementById('tab-dashboard').classList.contains('active')) {
-                listenData();
-            }
-        });
-    } catch (err) {
-        console.error("Auth Init Error:", err);
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+            await signInWithCustomToken(auth, __initial_auth_token);
+        } else {
+            await signInAnonymously(auth);
+        }
+    } catch (e) {
+        console.error("Authentication failed:", e);
     }
-  }
+  };
 
-  init();
+  // Start Auth and set up listener
+  onAuthStateChanged(auth, (user) => {
+    currentUser = user;
+    if (user) {
+        console.log("Authenticated as:", user.uid);
+        // If we are already on the dashboard, start listening
+        if (document.getElementById('tab-dashboard').classList.contains('active')) {
+            listenData();
+        }
+    }
+  });
 
+  initAuth();
 </script>
 </body>
 </html>
