@@ -11,81 +11,139 @@
         body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
     </style>
 </head>
-<body class="p-8">
+<body class="p-4 md:p-8">
     <div class="max-w-6xl mx-auto space-y-6">
-        <h1 class="text-2xl font-bold">ข้อมูลการประเมินการติดตั้ง ERV</h1>
-        <div id="stats" class="grid grid-cols-2 gap-4">
-            <div class="bg-white p-6 rounded-xl shadow">
-                <p class="text-sm text-gray-500">จำนวนทั้งหมด</p>
-                <h2 id="total" class="text-3xl font-bold">0</h2>
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800">ข้อมูลการประเมินการติดตั้ง ERV</h1>
+                <p class="text-gray-500 text-sm">อัปเดตข้อมูลแบบอัตโนมัติ (Live)</p>
             </div>
-            <div class="bg-white p-6 rounded-xl shadow">
-                <p class="text-sm text-gray-500">คะแนนเฉลี่ย</p>
-                <h2 id="avg" class="text-3xl font-bold">0.0</h2>
+            <div id="statusTag" class="bg-gray-100 text-gray-500 px-3 py-1 rounded-full text-xs font-medium">
+                กำลังเชื่อมต่อ...
             </div>
         </div>
-        <div class="bg-white rounded-xl shadow overflow-hidden">
-            <table class="w-full text-left">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="p-4 text-xs font-semibold uppercase">วัน/เวลา</th>
-                        <th class="p-4 text-xs font-semibold uppercase">ลูกค้า</th>
-                        <th class="p-4 text-xs font-semibold uppercase">เฉลี่ย</th>
-                        <th class="p-4 text-xs font-semibold uppercase">ความเห็น</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody" class="divide-y divide-gray-100"></tbody>
-            </table>
+
+        <div id="stats" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 text-center">
+                <p class="text-xs text-gray-400 uppercase font-semibold">จำนวนผู้ตอบทั้งหมด</p>
+                <h2 id="total" class="text-4xl font-bold text-blue-600">0</h2>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 text-center">
+                <p class="text-xs text-gray-400 uppercase font-semibold">คะแนนเฉลี่ยรวม</p>
+                <h2 id="avg" class="text-4xl font-bold text-yellow-500">0.0</h2>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead class="bg-gray-50 text-gray-400 text-[10px] uppercase tracking-widest">
+                        <tr>
+                            <th class="p-6 font-semibold">วัน/เวลา</th>
+                            <th class="p-6 font-semibold">ลูกค้า</th>
+                            <th class="p-6 font-semibold">คะแนน</th>
+                            <th class="p-6 font-semibold">ข้อเสนอแนะ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="divide-y divide-gray-100 text-sm">
+                        <tr><td colspan="4" class="p-10 text-center text-gray-400">กำลังรอข้อมูล...</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // Firebase Configuration
         const firebaseConfig = JSON.parse(__firebase_config);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'erv-survey-app';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'erv-quality-survey-v1';
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'surveys'), (snapshot) => {
-                    const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-                        .sort((a, b) => (b.submitted_at?.seconds || 0) - (a.submitted_at?.seconds || 0));
-                    
-                    document.getElementById('total').innerText = data.length;
-                    let totalAvg = 0;
-                    const tbody = document.getElementById('tableBody');
-                    tbody.innerHTML = '';
-
-                    data.forEach(item => {
-                        const vals = Object.values(item.ratings || {});
-                        const avg = vals.length ? (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1) : 0;
-                        totalAvg += parseFloat(avg);
-                        const date = item.submitted_at ? new Date(item.submitted_at.seconds * 1000).toLocaleString('th-TH') : '-';
-                        tbody.innerHTML += `
-                            <tr>
-                                <td class="p-4 text-xs text-gray-400">${date}</td>
-                                <td class="p-4 font-medium">${item.customer_name}</td>
-                                <td class="p-4"><span class="bg-yellow-100 px-2 py-1 rounded text-xs font-bold">${avg}</span></td>
-                                <td class="p-4 text-gray-500 text-sm italic">${item.feedback || '-'}</td>
-                            </tr>
-                        `;
-                    });
-                    document.getElementById('avg').innerText = data.length ? (totalAvg / data.length).toFixed(1) : "0.0";
-                });
+        // Function to render data to UI
+        function renderUI(data) {
+            document.getElementById('total').innerText = data.length;
+            let totalScore = 0;
+            const tbody = document.getElementById('tableBody');
+            
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-gray-400">ยังไม่มีข้อมูลส่งเข้ามา</td></tr>';
+                return;
             }
-        });
 
-        const init = async () => { 
-            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) await signInWithCustomToken(auth, __initial_auth_token);
-            else await signInAnonymously(auth);
+            tbody.innerHTML = '';
+            data.forEach(item => {
+                const ratings = item.ratings || {};
+                const scores = Object.values(ratings);
+                const avg = scores.length ? (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1) : 0;
+                totalScore += parseFloat(avg);
+                const date = item.submitted_at ? new Date(item.submitted_at.seconds * 1000).toLocaleString('th-TH') : '-';
+                
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="p-6 text-gray-400 text-xs">${date}</td>
+                        <td class="p-6">
+                            <div class="font-medium text-gray-800">${item.customer_name || 'ไม่ระบุชื่อ'}</div>
+                            <div class="text-[10px] text-gray-400">ID: ${item.job_id || '-'}</div>
+                        </td>
+                        <td class="p-6">
+                            <span class="inline-flex items-center bg-yellow-50 text-yellow-700 px-2.5 py-1 rounded-full text-xs font-bold">
+                                <i class="fas fa-star mr-1"></i> ${avg}
+                            </span>
+                        </td>
+                        <td class="p-6 text-gray-500 text-sm">${item.feedback || '-'}</td>
+                    </tr>
+                `;
+            });
+            document.getElementById('avg').innerText = data.length ? (totalScore / data.length).toFixed(1) : "0.0";
+        }
+
+        // Initialize Authentication and Data Fetching
+        const startApp = async () => {
+            try {
+                // RULE 3: Auth Before Queries - Ensure auth is complete before any Firestore call
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                // Wait for auth state to be confirmed
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        document.getElementById('statusTag').innerText = "เชื่อมต่อสำเร็จ (Live)";
+                        document.getElementById('statusTag').className = "bg-green-100 text-green-600 px-3 py-1 rounded-full text-xs font-medium";
+                        
+                        // Use correct public data path
+                        const surveyCollection = collection(db, 'artifacts', appId, 'public', 'data', 'surveys');
+                        
+                        // Set up real-time listener with error callback
+                        onSnapshot(surveyCollection, (snapshot) => {
+                            const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+                                .sort((a, b) => (b.submitted_at?.seconds || 0) - (a.submitted_at?.seconds || 0));
+                            
+                            renderUI(data);
+                        }, (err) => {
+                            console.error("Firestore Permission/Fetch Error:", err);
+                            document.getElementById('statusTag').innerText = "สิทธิ์การเข้าถึงไม่ถูกต้อง";
+                            document.getElementById('statusTag').className = "bg-red-100 text-red-600 px-3 py-1 rounded-full text-xs font-medium";
+                        });
+                    }
+                });
+            } catch (error) {
+                console.error("Authentication Error:", error);
+                document.getElementById('statusTag').innerText = "การยืนยันตัวตนล้มเหลว";
+            }
         };
-        init();
+
+        // Start the process
+        startApp();
     </script>
 </body>
 </html>
