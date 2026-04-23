@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>แบบสำรวจความพึงพอใจ — ติดตั้งระบบ ERV</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --blue: #1a6fc4;
+    --blue-light: #e8f2fb;
+    --blue-mid: #2d8ae8;
+    --green: #1a8a5a;
+    --green-light: #e6f7ef;
+    --red: #c0392b;
+    --red-light: #fdecea;
+    --amber: #d97706;
+    --amber-light: #fef3c7;
+    --gray-50: #f8f9fa;
+    --gray-100: #f1f3f5;
+    --gray-200: #e9ecef;
+    --gray-300: #dee2e6;
+    --gray-500: #868e96;
+    --gray-700: #495057;
+    --gray-900: #1a1a2e;
+    --text: #1a1a2e;
+    --text-muted: #6c757d;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --shadow: 0 2px 16px rgba(0,0,0,0.08);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+  }
+
+  body {
+    font-family: 'Sarabun', sans-serif;
+    background: linear-gradient(135deg, #f0f6ff 0%, #e8f4f8 50%, #f0fff4 100%);
+    min-height: 100vh;
+    color: var(--text);
+    padding: 0;
+  }
+
+  /* ===== TABS NAV ===== */
+  .top-nav {
+    background: white;
+    border-bottom: 1px solid var(--gray-200);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .nav-inner {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+  .nav-logo {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--blue);
+    padding: 14px 20px 14px 0;
+    border-right: 1px solid var(--gray-200);
+    margin-right: 16px;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .nav-logo span { font-size: 20px; }
+  .tab-btn {
+    padding: 16px 18px;
+    font-size: 14px;
+    font-family: 'Sarabun', sans-serif;
+    border: none;
+    background: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -1px;
+    white-space: nowrap;
+    transition: color 0.2s;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); font-weight: 600; }
+
+  /* ===== PANELS ===== */
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .content-wrap { max-width: 960px; margin: 0 auto; padding: 2rem 1rem; }
+
+  /* ===== QR PANEL ===== */
+  .qr-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 2rem;
+    align-items: start;
+  }
+  @media (max-width: 640px) { .qr-grid { grid-template-columns: 1fr; } }
+
+  .qr-card {
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 2rem;
+    text-align: center;
+    min-width: 240px;
+  }
+  .qr-card h2 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+  .qr-card p { font-size: 13px; color: var(--text-muted); margin-bottom: 1.25rem; }
+  #qrcode { display: flex; justify-content: center; margin-bottom: 1rem; }
+  #qrcode canvas, #qrcode img { border-radius: 8px; border: 4px solid white; box-shadow: 0 0 0 1px var(--gray-200); }
+  .qr-note { font-size: 12px; color: var(--text-muted); background: var(--gray-50); border-radius: 8px; padding: 8px 12px; }
+
+  .info-card {
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 1.75rem;
+  }
+  .info-card h3 { font-size: 18px; font-weight: 600; margin-bottom: 1.25rem; }
+  .step { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 1.25rem; }
+  .step-num {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--blue-light); color: var(--blue);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700; flex-shrink: 0;
+  }
+  .step-text { font-size: 14px; color: var(--gray-700); line-height: 1.65; padding-top: 4px; }
+  .step-text strong { color: var(--text); }
+
+  .tip-box {
+    background: var(--blue-light);
+    border-left: 4px solid var(--blue);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--blue);
+    margin-top: 1rem;
+    line-height: 1.6;
+  }
+
+  .print-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    margin-top: 1rem;
+    padding: 10px 22px;
+    background: var(--blue);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-family: 'Sarabun', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s;
+  }
+  .print-btn:hover { background: #155fa0; }
+
+  /* ===== SURVEY PANEL ===== */
+  .survey-wrap {
+    max-width: 620px;
+    margin: 0 auto;
+  }
+  .survey-card {
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+  }
+  .survey-header {
+    background: linear-gradient(135deg, var(--blue) 0%, #2d8ae8 100%);
+    color: white;
+    padding: 2rem 2rem 1.5rem;
+    text-align: center;
+  }
+  .survey-header .icon { font-size: 44px; margin-bottom: 10px; }
+  .survey-header h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+  .survey-header p { font-size: 14px; opacity: 0.88; line-height: 1.6; }
+  .survey-body { padding: 1.75rem 2rem; }
+  @media (max-width: 480px) { .survey-body { padding: 1.25rem 1rem; } }
+
+  .q-block { margin-bottom: 1.75rem; }
+  .q-label {
+    display: block;
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    line-height: 1.5;
+  }
+  .q-num { color: var(--blue); margin-right: 6px; }
+
+  /* Stars */
+  .star-row { display: flex; gap: 8px; }
+  .star {
+    width: 44px; height: 44px;
+    font-size: 28px; line-height: 44px; text-align: center;
+    cursor: pointer;
+    transition: transform 0.12s;
+    filter: grayscale(1);
+    opacity: 0.4;
+    user-select: none;
+  }
+  .star.on { filter: none; opacity: 1; transform: scale(1.15); }
+  .star:hover { transform: scale(1.2); filter: none; opacity: 0.85; }
+  .star-hint { font-size: 12px; color: var(--text-muted); margin-top: 6px; min-height: 18px; }
+
+  /* Chips */
+  .chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    padding: 8px 16px;
+    border: 1.5px solid var(--gray-300);
+    border-radius: 999px;
+    font-size: 14px;
+    font-family: 'Sarabun', sans-serif;
+    background: white;
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .chip:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-light); }
+  .chip.sel { border-color: var(--blue); background: var(--blue-light); color: var(--blue); font-weight: 600; }
+  .chip.sel-no { border-color: var(--red); background: var(--red-light); color: var(--red); font-weight: 600; }
+
+  /* Textarea */
+  .survey-body textarea {
+    width: 100%;
+    border: 1.5px solid var(--gray-300);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    font-size: 14px;
+    font-family: 'Sarabun', sans-serif;
+    resize: vertical;
+    min-height: 90px;
+    color: var(--text);
+    transition: border 0.2s;
+    line-height: 1.7;
+  }
+  .survey-body textarea:focus { outline: none; border-color: var(--blue); }
+
+  /* Submit */
+  .submit-btn {
+    width: 100%;
+    padding: 14px;
+    background: var(--blue);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 16px;
+    font-family: 'Sarabun', sans-serif;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 0.25rem;
+    transition: background 0.2s, transform 0.1s;
+    letter-spacing: 0.3px;
+  }
+  .submit-btn:hover { background: #155fa0; }
+  .submit-btn:active { transform: scale(0.99); }
+
+  /* Success */
+  .success-card {
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    padding: 3rem 2rem;
+    text-align: center;
+  }
+  .success-card .big { font-size: 64px; margin-bottom: 1rem; }
+  .success-card h2 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+  .success-card p { font-size: 15px; color: var(--text-muted); line-height: 1.7; max-width: 380px; margin: 0 auto 1.5rem; }
+  .reset-btn {
+    display: inline-block;
+    padding: 10px 28px;
+    border: 2px solid var(--blue);
+    border-radius: var(--radius-sm);
+    color: var(--blue);
+    font-size: 14px;
+    font-family: 'Sarabun', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    background: none;
+  }
+  .reset-btn:hover { background: var(--blue-light); }
+
+  /* ===== DASHBOARD PANEL ===== */
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin-bottom: 1.5rem;
+  }
+  .metric {
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 1.25rem 1.25rem 1rem;
+  }
+  .metric .mlabel { font-size: 13px; color: var(--text-muted); margin-bottom: 6px; }
+  .metric .mval { font-size: 26px; font-weight: 700; color: var(--text); }
+  .metric .msub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+  .dash-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+  .dash-header h3 { font-size: 16px; font-weight: 600; }
+  .clear-btn {
+    font-size: 13px;
+    color: var(--text-muted);
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-family: 'Sarabun', sans-serif;
+    padding: 4px 10px;
+    border-radius: 6px;
+  }
+  .clear-btn:hover { color: var(--red); background: var(--red-light); }
+
+  .resp-list { display: flex; flex-direction: column; gap: 12px; }
+  .resp-card {
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 1.25rem 1.5rem;
+    border-left: 4px solid var(--gray-300);
+  }
+  .resp-card.hi { border-left-color: var(--green); }
+  .resp-card.mid { border-left-color: var(--amber); }
+  .resp-card.lo { border-left-color: var(--red); }
+
+  .resp-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .resp-date { font-size: 12px; color: var(--text-muted); }
+  .badge {
+    font-size: 11px;
+    padding: 3px 12px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .badge.hi { background: var(--green-light); color: var(--green); }
+  .badge.mid { background: var(--amber-light); color: var(--amber); }
+  .badge.lo { background: var(--red-light); color: var(--red); }
+
+  .resp-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 16px;
+    font-size: 13px;
+  }
+  @media (max-width: 480px) { .resp-grid { grid-template-columns: 1fr; } }
+  .resp-row { display: flex; flex-direction: column; gap: 1px; }
+  .resp-row .rl { color: var(--text-muted); font-size: 12px; }
+  .resp-row .rv { color: var(--text); font-weight: 600; }
+  .resp-comment {
+    margin-top: 10px;
+    font-size: 13px;
+    color: var(--gray-700);
+    border-top: 1px solid var(--gray-200);
+    padding-top: 10px;
+    font-style: italic;
+    line-height: 1.65;
+  }
+  .empty-dash {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-muted);
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+  .empty-dash .big { font-size: 40px; margin-bottom: 0.75rem; }
+  .empty-dash p { font-size: 15px; }
+
+  /* Progress bar */
+  .sat-bar-wrap { margin-top: 1rem; }
+  .sat-bar-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+  .sat-bar { height: 8px; background: var(--gray-200); border-radius: 999px; overflow: hidden; }
+  .sat-bar-fill { height: 100%; background: var(--blue); border-radius: 999px; transition: width 0.4s; }
+
+  @media print {
+    .top-nav { display: none; }
+    #tab-qr { display: block !important; }
+    #tab-survey, #tab-dashboard { display: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav class="top-nav">
+  <div class="nav-inner">
+    <div class="nav-logo"><span>💨</span> ระบบ ERV Survey</div>
+    <button class="tab-btn active" onclick="switchTab('qr', this)">QR Code</button>
+    <button class="tab-btn" onclick="switchTab('survey', this)">แบบสำรวจ</button>
+    <button class="tab-btn" onclick="switchTab('dashboard', this)">รีวิวคำตอบ</button>
+  </div>
+</nav>
+
+<!-- ======================== QR PANEL ======================== -->
+<div id="tab-qr" class="panel active">
+  <div class="content-wrap">
+    <div class="qr-grid">
+
+      <div class="qr-card">
+        <h2>QR Code สำหรับลูกค้า</h2>
+        <p>สแกนเพื่อทำแบบสอบถาม</p>
+        <div id="qrcode"></div>
+        <div class="qr-note">ลูกค้าสแกนด้วยกล้องสมาร์ทโฟน<br>ไม่ต้องดาวน์โหลดแอปพลิเคชัน</div>
+        <br>
+        <button class="print-btn" onclick="window.print()">🖨️ พิมพ์ QR Code</button>
+      </div>
+
+      <div class="info-card">
+        <h3>วิธีใช้งานระบบ</h3>
+
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-text"><strong>ติดตั้งเสร็จแล้ว</strong> — แสดง QR Code ให้ลูกค้าหลังทีมงานติดตั้งระบบ ERV เสร็จสิ้น</div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-text"><strong>ลูกค้าสแกน</strong> — ใช้กล้องมือถือสแกน QR Code เพื่อเปิดแบบสอบถาม</div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-text"><strong>ตอบแบบสอบถาม</strong> — 5 คำถามสั้นๆ เกี่ยวกับความพึงพอใจในการติดตั้ง ใช้เวลาประมาณ 2 นาที</div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-text"><strong>ดูผลลัพธ์</strong> — ทีมงานเปิดแท็บ "รีวิวคำตอบ" เพื่อดูคะแนนและความคิดเห็นของลูกค้า</div>
+        </div>
+
+        <div class="tip-box">
+          💡 <strong>เคล็ดลับ:</strong> พิมพ์ QR Code ใส่กระดาษ A5 แล้วติดไว้ที่หน้างาน หรือส่งรูป QR Code ให้ลูกค้าทาง LINE ก็ได้
+        </div>
+
+        <div style="margin-top: 1.25rem; display: flex; gap: 10px; flex-wrap: wrap;">
+          <button class="print-btn" onclick="switchTab('survey', document.querySelectorAll('.tab-btn')[1])">
+            👁️ ดูตัวอย่างแบบสอบถาม
+          </button>
+          <button class="print-btn" style="background: var(--green);" onclick="switchTab('dashboard', document.querySelectorAll('.tab-btn')[2])">
+            📊 ดูรีวิวคำตอบ
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ======================== SURVEY PANEL ======================== -->
+<div id="tab-survey" class="panel">
+  <div class="content-wrap">
+    <div class="survey-wrap">
+
+      <!-- Survey Form -->
+      <div id="surveyForm">
+        <div class="survey-card">
+          <div class="survey-header">
+            <div class="icon">💨</div>
+            <h1>แบบสอบถามความพึงพอใจ<br>การติดตั้งระบบ ERV</h1>
+            <p>ความคิดเห็นของคุณมีคุณค่าอย่างยิ่ง<br>กรุณาสละเวลาประมาณ 2 นาที เพื่อประเมินการบริการของเรา</p>
+          </div>
+
+          <div class="survey-body">
+
+            <!-- Q1 Stars -->
+            <div class="q-block">
+              <span class="q-label"><span class="q-num">1.</span> โดยรวมแล้ว คุณพึงพอใจกับการติดตั้งระบบ ERV มากน้อยเพียงใด?</span>
+              <div class="star-row">
+                <div class="star" onclick="rateStar(1)">⭐</div>
+                <div class="star" onclick="rateStar(2)">⭐</div>
+                <div class="star" onclick="rateStar(3)">⭐</div>
+                <div class="star" onclick="rateStar(4)">⭐</div>
+                <div class="star" onclick="rateStar(5)">⭐</div>
+              </div>
+              <div class="star-hint" id="starHint">แตะดาวเพื่อให้คะแนน</div>
+            </div>
+
+            <!-- Q2 Professionalism -->
+            <div class="q-block">
+              <span class="q-label"><span class="q-num">2.</span> ทีมงานติดตั้งมีความเป็นมืออาชีพมากน้อยเพียงใด?</span>
+              <div class="chip-row" id="q2">
+                <button class="chip" onclick="pick('q2','มืออาชีพมาก',this)">มืออาชีพมาก</button>
+                <button class="chip" onclick="pick('q2','ค่อนข้างดี',this)">ค่อนข้างดี</button>
+                <button class="chip" onclick="pick('q2','ปานกลาง',this)">ปานกลาง</button>
+                <button class="chip" onclick="pick('q2','ควรปรับปรุง',this,'sel-no')">ควรปรับปรุง</button>
+              </div>
+            </div>
+
+            <!-- Q3 On time -->
+            <div class="q-block">
+              <span class="q-label"><span class="q-num">3.</span> งานติดตั้งเสร็จตรงเวลาตามที่นัดหมายหรือไม่?</span>
+              <div class="chip-row" id="q3">
+                <button class="chip" onclick="pick('q3','ตรงเวลา',this)">ตรงเวลา</button>
+                <button class="chip" onclick="pick('q3','ล่าช้าเล็กน้อย',this)">ล่าช้าเล็กน้อย</button>
+                <button class="chip" onclick="pick('q3','ล่าช้ามาก',this,'sel-no')">ล่าช้ามาก</button>
+              </div>
+            </div>
+
+            <!-- Q4 System performance -->
+            <div class="q-block">
+              <span class="q-label"><span class="q-num">4.</span> คุณพึงพอใจกับประสิทธิภาพของระบบ ERV หลังติดตั้งมากน้อยเพียงใด?</span>
+              <div class="chip-row" id="q4">
+                <button class="chip" onclick="pick('q4','พึงพอใจมาก',this)">พึงพอใจมาก</button>
+                <button class="chip" onclick="pick('q4','พึงพอใจ',this)">พึงพอใจ</button>
+                <button class="chip" onclick="pick('q4','ปานกลาง',this)">ปานกลาง</button>
+                <button class="chip" onclick="pick('q4','ไม่พึงพอใจ',this,'sel-no')">ไม่พึงพอใจ</button>
+              </div>
+            </div>
+
+            <!-- Q5 Recommend -->
+            <div class="q-block">
+              <span class="q-label"><span class="q-num">5.</span> คุณจะแนะนำบริการติดตั้งระบบ ERV ของเราให้กับคนรู้จักหรือไม่?</span>
+              <div class="chip-row" id="q5">
+                <button class="chip" onclick="pick('q5','แนะนำอย่างยิ่ง',this)">แนะนำอย่างยิ่ง</button>
+                <button class="chip" onclick="pick('q5','อาจจะแนะนำ',this)">อาจจะแนะนำ</button>
+                <button class="chip" onclick="pick('q5','ไม่แนะนำ',this,'sel-no')">ไม่แนะนำ</button>
+              </div>
+            </div>
+
+            <!-- Comment -->
+            <div class="q-block">
+              <span class="q-label"><span class="q-num">6.</span> ความคิดเห็นเพิ่มเติม (ไม่บังคับ)</span>
+              <textarea id="comment" placeholder="กรุณาแชร์ประสบการณ์หรือข้อแนะนำของคุณ..."></textarea>
+            </div>
+
+            <button class="submit-btn" onclick="submitSurvey()">ส่งแบบสอบถาม ✓</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Success -->
+      <div id="successMsg" style="display:none;">
+        <div class="success-card">
+          <div class="big">🎉</div>
+          <h2>ขอบคุณสำหรับความคิดเห็น!</h2>
+          <p>เราได้รับคำตอบของคุณเรียบร้อยแล้ว และจะนำข้อมูลไปพัฒนาคุณภาพการบริการให้ดียิ่งขึ้น</p>
+          <button class="reset-btn" onclick="resetSurvey()">ส่งแบบสอบถามใหม่อีกครั้ง</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ======================== DASHBOARD PANEL ======================== -->
+<div id="tab-dashboard" class="panel">
+  <div class="content-wrap">
+
+    <div class="metrics" id="metricsRow">
+      <div class="metric">
+        <div class="mlabel">จำนวนคำตอบทั้งหมด</div>
+        <div class="mval" id="m-total">0</div>
+        <div class="msub">ราย</div>
+      </div>
+      <div class="metric">
+        <div class="mlabel">คะแนนเฉลี่ย</div>
+        <div class="mval" id="m-avg">—</div>
+        <div class="msub">จาก 5 ดาว</div>
+      </div>
+      <div class="metric">
+        <div class="mlabel">แนะนำบริการ</div>
+        <div class="mval" id="m-rec">—</div>
+        <div class="msub">ของลูกค้าทั้งหมด</div>
+      </div>
+      <div class="metric">
+        <div class="mlabel">งานเสร็จตรงเวลา</div>
+        <div class="mval" id="m-ot">—</div>
+        <div class="msub">ของลูกค้าทั้งหมด</div>
+      </div>
+    </div>
+
+    <div class="dash-header">
+      <h3>รายการคำตอบล่าสุด</h3>
+      <button class="clear-btn" onclick="clearAll()">🗑️ ล้างข้อมูลทั้งหมด</button>
+    </div>
+
+    <div class="resp-list" id="responseList">
+      <div class="empty-dash">
+        <div class="big">📋</div>
+        <p>ยังไม่มีคำตอบ<br>ให้ลูกค้าสแกน QR Code เพื่อเริ่มทำแบบสอบถาม</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const starHints = ['','ต้องปรับปรุงมาก','ต่ำกว่าความคาดหวัง','ปานกลาง','ดีมาก','ดีเยี่ยม!'];
+  let state = { star: 0, q2: '', q3: '', q4: '', q5: '' };
+  let responses = [];
+  try { responses = JSON.parse(localStorage.getItem('erv_responses_th') || '[]'); } catch(e) {}
+
+  function switchTab(name, el) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    if (el) el.classList.add('active');
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    if (name === 'dashboard') renderDashboard();
+  }
+
+  function rateStar(v) {
+    state.star = v;
+    document.querySelectorAll('.star').forEach((s, i) => {
+      s.classList.toggle('on', i < v);
+    });
+    document.getElementById('starHint').textContent = starHints[v];
+  }
+
+  function pick(qid, val, el, cls) {
+    state[qid] = val;
+    document.querySelectorAll('#' + qid + ' .chip').forEach(b => { b.classList.remove('sel'); b.classList.remove('sel-no'); });
+    el.classList.add(cls || 'sel');
+  }
+
+  function submitSurvey() {
+    if (!state.star) { alert('กรุณาให้คะแนนความพึงพอใจโดยรวมก่อน'); return; }
+    const resp = {
+      date: new Date().toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' }),
+      star: state.star,
+      professionalism: state.q2 || 'ไม่ได้ตอบ',
+      onTime: state.q3 || 'ไม่ได้ตอบ',
+      performance: state.q4 || 'ไม่ได้ตอบ',
+      recommend: state.q5 || 'ไม่ได้ตอบ',
+      comment: document.getElementById('comment').value.trim()
+    };
+    responses.unshift(resp);
+    try { localStorage.setItem('erv_responses_th', JSON.stringify(responses)); } catch(e) {}
+    document.getElementById('surveyForm').style.display = 'none';
+    document.getElementById('successMsg').style.display = 'block';
+  }
+
+  function resetSurvey() {
+    state = { star: 0, q2: '', q3: '', q4: '', q5: '' };
+    document.querySelectorAll('.chip').forEach(b => { b.classList.remove('sel'); b.classList.remove('sel-no'); });
+    document.querySelectorAll('.star').forEach(s => s.classList.remove('on'));
+    document.getElementById('starHint').textContent = 'แตะดาวเพื่อให้คะแนน';
+    document.getElementById('comment').value = '';
+    document.getElementById('surveyForm').style.display = 'block';
+    document.getElementById('successMsg').style.display = 'none';
+  }
+
+  function clearAll() {
+    if (confirm('ต้องการล้างข้อมูลคำตอบทั้งหมดหรือไม่?')) {
+      responses = [];
+      try { localStorage.removeItem('erv_responses_th'); } catch(e) {}
+      renderDashboard();
+    }
+  }
+
+  function renderDashboard() {
+    const total = responses.length;
+    document.getElementById('m-total').textContent = total;
+    if (total === 0) {
+      document.getElementById('m-avg').textContent = '—';
+      document.getElementById('m-rec').textContent = '—';
+      document.getElementById('m-ot').textContent = '—';
+      document.getElementById('responseList').innerHTML = `<div class="empty-dash"><div class="big">📋</div><p>ยังไม่มีคำตอบ<br>ให้ลูกค้าสแกน QR Code เพื่อเริ่มทำแบบสอบถาม</p></div>`;
+      return;
+    }
+    const avg = (responses.reduce((s,r) => s + r.star, 0) / total).toFixed(1);
+    const rec = Math.round(responses.filter(r => r.recommend === 'แนะนำอย่างยิ่ง').length / total * 100);
+    const ot = Math.round(responses.filter(r => r.onTime === 'ตรงเวลา').length / total * 100);
+    document.getElementById('m-avg').textContent = avg + ' ⭐';
+    document.getElementById('m-rec').textContent = rec + '%';
+    document.getElementById('m-ot').textContent = ot + '%';
+
+    document.getElementById('responseList').innerHTML = responses.map(r => {
+      const cls = r.star >= 4 ? 'hi' : r.star === 3 ? 'mid' : 'lo';
+      const label = r.star >= 4 ? '😊 ดีมาก' : r.star === 3 ? '😐 ปานกลาง' : '😟 ต้องปรับปรุง';
+      const stars = '⭐'.repeat(r.star) + '☆'.repeat(5 - r.star);
+      return `<div class="resp-card ${cls}">
+        <div class="resp-top">
+          <span class="resp-date">📅 ${r.date}</span>
+          <span class="badge ${cls}">${label}</span>
+        </div>
+        <div class="resp-grid">
+          <div class="resp-row"><span class="rl">ความพึงพอใจรวม</span><span class="rv">${stars} (${r.star}/5)</span></div>
+          <div class="resp-row"><span class="rl">ความเป็นมืออาชีพ</span><span class="rv">${r.professionalism}</span></div>
+          <div class="resp-row"><span class="rl">ตรงเวลา</span><span class="rv">${r.onTime}</span></div>
+          <div class="resp-row"><span class="rl">ประสิทธิภาพระบบ</span><span class="rv">${r.performance}</span></div>
+          <div class="resp-row"><span class="rl">แนะนำบริการ</span><span class="rv">${r.recommend}</span></div>
+        </div>
+        ${r.comment ? `<div class="resp-comment">💬 "${r.comment}"</div>` : ''}
+      </div>`;
+    }).join('');
+  }
+
+  // Generate QR
+  window.addEventListener('load', function() {
+    const url = window.location.href.split('?')[0];
+    try {
+      new QRCode(document.getElementById('qrcode'), {
+        text: url,
+        width: 200,
+        height: 200,
+        colorDark: '#1a1a2e',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M
+      });
+    } catch(e) {
+      document.getElementById('qrcode').innerHTML = '<div style="width:200px;height:200px;background:#f1f3f5;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#868e96;font-size:13px;text-align:center;padding:1rem;">QR Code จะปรากฏเมื่ออัพโหลดไฟล์ออนไลน์</div>';
+    }
+  });
+</script>
+</body>
+</html>
