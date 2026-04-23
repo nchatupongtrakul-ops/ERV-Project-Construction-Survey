@@ -23,6 +23,7 @@
             </div>
         </div>
 
+        <!-- ส่วนแสดงสถิติ -->
         <div id="stats" class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 text-center">
                 <p class="text-xs text-gray-400 uppercase font-semibold">จำนวนผู้ตอบทั้งหมด</p>
@@ -34,6 +35,7 @@
             </div>
         </div>
 
+        <!-- ตารางแสดงข้อมูล -->
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full text-left">
@@ -66,7 +68,7 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        // Function to render data to UI
+        // ฟังก์ชันแสดงข้อมูลบน UI
         function renderUI(data) {
             document.getElementById('total').innerText = data.length;
             let totalScore = 0;
@@ -104,33 +106,33 @@
             document.getElementById('avg').innerText = data.length ? (totalScore / data.length).toFixed(1) : "0.0";
         }
 
-        // Initialize Authentication and Data Fetching
+        // เริ่มต้นระบบยืนยันตัวตนและดึงข้อมูล
         const startApp = async () => {
             try {
-                // RULE 3: Auth Before Queries - Ensure auth is complete before any Firestore call
+                // ยืนยันตัวตนก่อนเริ่ม Query
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await signInWithCustomToken(auth, __initial_auth_token);
                 } else {
                     await signInAnonymously(auth);
                 }
 
-                // Wait for auth state to be confirmed
+                // เมื่อสถานะ Auth ยืนยันแล้ว
                 onAuthStateChanged(auth, (user) => {
                     if (user) {
                         document.getElementById('statusTag').innerText = "เชื่อมต่อสำเร็จ (Live)";
                         document.getElementById('statusTag').className = "bg-green-100 text-green-600 px-3 py-1 rounded-full text-xs font-medium";
                         
-                        // Use correct public data path
+                        // ใช้ Path ข้อมูลสาธารณะที่ถูกต้อง
                         const surveyCollection = collection(db, 'artifacts', appId, 'public', 'data', 'surveys');
                         
-                        // Set up real-time listener with error callback
+                        // ติดตามการเปลี่ยนแปลงข้อมูลแบบเรียลไทม์
                         onSnapshot(surveyCollection, (snapshot) => {
                             const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
                                 .sort((a, b) => (b.submitted_at?.seconds || 0) - (a.submitted_at?.seconds || 0));
                             
                             renderUI(data);
                         }, (err) => {
-                            console.error("Firestore Permission/Fetch Error:", err);
+                            console.error("Firestore Error:", err);
                             document.getElementById('statusTag').innerText = "สิทธิ์การเข้าถึงไม่ถูกต้อง";
                             document.getElementById('statusTag').className = "bg-red-100 text-red-600 px-3 py-1 rounded-full text-xs font-medium";
                         });
@@ -142,7 +144,6 @@
             }
         };
 
-        // Start the process
         startApp();
     </script>
 </body>
