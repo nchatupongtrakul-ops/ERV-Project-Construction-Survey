@@ -153,7 +153,9 @@
           <input type="text" id="input-cust" class="input-box" placeholder="ระบุชื่อเพื่อบันทึกข้อมูล">
         </div>
 
-        <div id="q-container"></div>
+        <div id="q-container">
+            <!-- คำถามจะถูกสร้างขึ้นที่นี่โดย JavaScript -->
+        </div>
 
         <div class="q-group">
           <label class="q-title">ข้อแนะนำเพิ่มเติม</label>
@@ -206,9 +208,8 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
   import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-  import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+  import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
-  // ใช้ค่า Config ที่คุณระบุมาโดยตรง
   const firebaseConfig = {
     apiKey: "AIzaSyCrP6AIvPcs8ORHBdYJYfkbZJsGn-1Hkqg",
     authDomain: "erv-survey.firebaseapp.com",
@@ -222,8 +223,7 @@
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
   const auth = getAuth(app);
-  const appId = "coral-life-erv-survey"; // ID สำหรับแยกข้อมูลใน Firestore
-  
+  const appId = "coral-life-erv-survey";
   const colRef = collection(db, "artifacts", appId, "public", "data", "surveys");
 
   let surveyScores = { overall: 0, professional: 0, clean: 0, punctuality: 0 };
@@ -239,60 +239,55 @@
     { key: 'punctuality', label: 'ความตรงต่อเวลานัดหมาย', id: '04' }
   ];
 
-  // วาดคำถามทันที
-  const qContainer = document.getElementById('q-container');
-  questions.forEach(q => {
-    const html = `
-      <div class="q-group">
-        <label class="q-title"><span>${q.id}.</span> ${q.label}</label>
-        <div class="star-container">
-          <div class="star-row" data-key="${q.key}">
-            ${Array(10).fill(0).map((_, i) => `<span class="star" data-v="${i+1}">🌸</span>`).join('')}
-          </div>
-          <div class="rating-label" id="label-${q.key}">รอกดเลือกคะแนน</div>
-        </div>
-      </div>
-    `;
-    qContainer.insertAdjacentHTML('beforeend', html);
-  });
-
-  document.querySelectorAll('.star-row').forEach(row => {
-    const key = row.dataset.key;
-    const stars = row.querySelectorAll('.star');
-    const label = document.getElementById(`label-${key}`);
+  // ฟังก์ชันวาดคำถาม
+  function initSurveyUI() {
+    const qContainer = document.getElementById('q-container');
+    if (!qContainer) return;
     
-    stars.forEach((s, idx) => {
-      const val = idx + 1;
-      s.onmouseover = () => highlightStars(stars, val);
-      s.onmouseleave = () => highlightStars(stars, surveyScores[key]);
-      s.onclick = () => {
-        surveyScores[key] = val;
-        label.textContent = `${val}/10 — ${scoreText[val]}`;
-        highlightStars(stars, val);
-      };
+    qContainer.innerHTML = ''; // เคลียร์ก่อนเผื่อกรณีโหลดซ้ำ
+    questions.forEach(q => {
+      const html = `
+        <div class="q-group">
+          <label class="q-title"><span>${q.id}.</span> ${q.label}</label>
+          <div class="star-container">
+            <div class="star-row" data-key="${q.key}">
+              ${Array(10).fill(0).map((_, i) => `<span class="star" data-v="${i+1}">🌸</span>`).join('')}
+            </div>
+            <div class="rating-label" id="label-${q.key}">รอกดเลือกคะแนน</div>
+          </div>
+        </div>
+      `;
+      qContainer.insertAdjacentHTML('beforeend', html);
     });
-  });
+
+    // ผูก Event ให้กับดาวหลังจากสร้างเสร็จ
+    document.querySelectorAll('.star-row').forEach(row => {
+      const key = row.dataset.key;
+      const stars = row.querySelectorAll('.star');
+      const label = document.getElementById(`label-${key}`);
+      
+      stars.forEach((s, idx) => {
+        const val = idx + 1;
+        s.addEventListener('mouseover', () => highlightStars(stars, val));
+        s.addEventListener('mouseleave', () => highlightStars(stars, surveyScores[key]));
+        s.addEventListener('click', () => {
+          surveyScores[key] = val;
+          label.textContent = `${val}/10 — ${scoreText[val]}`;
+          highlightStars(stars, val);
+        });
+      });
+    });
+  }
 
   function highlightStars(stars, count) {
     stars.forEach((s, i) => s.classList.toggle('on', i < count));
   }
 
-  // ล็อกอินอัตโนมัติ
-  const initAuth = async () => {
-    try {
-      await signInAnonymously(auth);
-    } catch (err) { console.error("Auth Fail:", err); }
-  };
-  initAuth();
-
-  function startDataStream() {
-    if (unsubscribeStream) unsubscribeStream();
-    const q = query(colRef, orderBy('timestamp', 'desc'));
-    unsubscribeStream = onSnapshot(q, (snap) => {
-      records = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      renderDash();
-    }, (err) => console.log("Database Syncing..."));
-  }
+  // เรียกใช้ฟังก์ชันเมื่อหน้าเว็บโหลดเสร็จสมบูรณ์
+  window.addEventListener('DOMContentLoaded', () => {
+    initSurveyUI();
+    signInAnonymously(auth).catch(err => console.error("Auth Fail:", err));
+  });
 
   document.getElementById('btn-submit-all').onclick = async () => {
     const name = document.getElementById('input-cust').value.trim();
@@ -312,10 +307,19 @@
     } catch (e) { alert("Error: " + e.message); }
   };
 
+  function startDataStream() {
+    if (unsubscribeStream) unsubscribeStream();
+    const q = query(colRef, orderBy('timestamp', 'desc'));
+    unsubscribeStream = onSnapshot(q, (snap) => {
+      records = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      renderDash();
+    }, (err) => console.log("Database Syncing..."));
+  }
+
   function renderDash() {
     const count = records.length;
     document.getElementById('stat-count').textContent = count;
-    const getAvg = (k) => count === 0 ? "0.0" : (records.reduce((a, b) => a + (b[k] || 0), 0) / count).toFixed(1);
+    const getAvg = (k) => count === 0 ? "0.0" : (records.reduce((a, b) => a + (Number(b[k]) || 0), 0) / count).toFixed(1);
     
     document.getElementById('avg-overall').textContent = getAvg('overall');
     document.getElementById('avg-prof').textContent = getAvg('professional');
@@ -333,7 +337,11 @@
           borderRadius: 12
         }]
       },
-      options: { indexAxis: 'y', plugins: { legend: { display: false } } }
+      options: { 
+          indexAxis: 'y', 
+          plugins: { legend: { display: false } },
+          scales: { x: { min: 0, max: 10 } }
+      }
     });
 
     document.getElementById('data-log').innerHTML = records.map(r => `
@@ -372,9 +380,9 @@
 
   document.getElementById('btn-export').onclick = () => {
     const csv = ["\uFEFFCustomer,Overall,Professional,Clean,Punctuality,Comment"];
-    records.forEach(r => csv.push(`"${r.customer}",${r.overall},${r.professional},${r.clean},${r.punctuality},"${(r.comment||'')}"`));
+    records.forEach(r => csv.push(`"${r.customer}",${r.overall},${r.professional},${r.clean},${r.punctuality},"${(r.comment||'').replace(/"/g, '""')}"`));
     const link = document.createElement('a');
-    link.href = URL.createObjectURL(new Blob([csv.join('\n')], { type: 'text/csv' }));
+    link.href = URL.createObjectURL(new Blob([csv.join('\n')], { type: 'text/csv;charset=utf-8;' }));
     link.download = `Survey_Export_${new Date().toLocaleDateString()}.csv`;
     link.click();
   };
