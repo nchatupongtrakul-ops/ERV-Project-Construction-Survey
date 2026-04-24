@@ -19,464 +19,358 @@
     --shadow: 0 2px 16px rgba(0,0,0,0.08);
     --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
   }
-  body { font-family: 'Sarabun', sans-serif; background: linear-gradient(135deg,#f0f6ff,#e8f4f8 50%,#f0fff4); min-height: 100vh; color: var(--text); }
+  body { font-family: 'Sarabun', sans-serif; background: #f8fafc; min-height: 100vh; color: var(--text); }
 
-  .top-nav { background: white; border-bottom: 1px solid var(--gray-200); position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  /* Navigation */
+  .top-nav { background: white; border-bottom: 1px solid var(--gray-200); position: sticky; top: 0; z-index: 100; }
   .nav-inner { max-width: 960px; margin: 0 auto; padding: 0 1rem; display: flex; align-items: center; justify-content: space-between; }
-  .nav-logo { font-size: 16px; font-weight: 600; color: var(--blue); padding: 14px 0; }
-  .tab-btn { padding: 16px 18px; font-size: 14px; font-family: 'Sarabun', sans-serif; border: none; background: none; color: var(--text-muted); cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; }
+  .nav-logo { font-size: 18px; font-weight: 700; color: var(--blue); padding: 14px 0; }
+  .tab-btn { padding: 16px 18px; font-size: 14px; font-family: 'Sarabun'; border: none; background: none; color: var(--text-muted); cursor: pointer; border-bottom: 3px solid transparent; }
   .tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); font-weight: 600; }
-  .tab-btn:hover:not(.active) { color: var(--text); }
 
+  /* Layout */
   .panel { display: none; }
   .panel.active { display: block; }
   .content-wrap { max-width: 960px; margin: 0 auto; padding: 2rem 1rem; }
 
-  .survey-wrap { max-width: 620px; margin: 0 auto; }
-  .survey-card { background: white; border-radius: var(--radius); box-shadow: var(--shadow-lg); overflow: hidden; }
-  .survey-header { background: linear-gradient(135deg, var(--blue), #2d8ae8); color: white; padding: 2rem 2rem 1.5rem; text-align: center; }
-  .survey-header .icon { font-size: 44px; margin-bottom: 10px; }
-  .survey-header h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; line-height: 1.4; }
-  .survey-header p { font-size: 14px; opacity: 0.88; line-height: 1.6; }
-  .survey-body { padding: 1.75rem 2rem; }
-  .q-block { margin-bottom: 1.75rem; }
-  .q-label { display: block; font-size: 15px; font-weight: 600; margin-bottom: 10px; line-height: 1.5; }
-  .q-num { color: var(--blue); margin-right: 6px; }
+  /* Survey Card */
+  .survey-card { background: white; border-radius: var(--radius); box-shadow: var(--shadow-lg); overflow: hidden; max-width: 600px; margin: 0 auto; }
+  .survey-header { background: var(--blue); color: white; padding: 2rem; text-align: center; }
+  .survey-body { padding: 2rem; }
+  .q-block { margin-bottom: 1.5rem; }
+  .q-label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 15px; }
 
+  /* Star Elements */
   .star-row { display: flex; gap: 8px; }
-  .star { width: 44px; height: 44px; font-size: 28px; line-height: 44px; text-align: center; cursor: pointer; transition: transform 0.12s; filter: grayscale(1); opacity: 0.4; user-select: none; }
-  .star.on { filter: none; opacity: 1; transform: scale(1.15); }
-  .star-hint { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+  .star { font-size: 32px; cursor: pointer; filter: grayscale(1); opacity: 0.3; transition: 0.2s; }
+  .star.on { filter: none; opacity: 1; transform: scale(1.1); }
+  .star-hint { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
 
+  /* Selection Chips */
   .chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
-  .chip { padding: 8px 16px; border: 1.5px solid var(--gray-300); border-radius: 999px; font-size: 14px; font-family: 'Sarabun', sans-serif; background: white; color: var(--text); cursor: pointer; transition: all 0.15s; }
+  .chip { padding: 8px 16px; border: 1px solid var(--gray-300); border-radius: 20px; background: white; cursor: pointer; font-family: 'Sarabun'; font-size: 14px; }
   .chip.sel { border-color: var(--blue); background: var(--blue-light); color: var(--blue); font-weight: 600; }
   .chip.sel-no { border-color: var(--red); background: var(--red-light); color: var(--red); font-weight: 600; }
 
-  .input-field { width: 100%; border: 1.5px solid var(--gray-300); border-radius: var(--radius-sm); padding: 10px 14px; font-size: 14px; font-family: 'Sarabun', sans-serif; color: var(--text); transition: border-color 0.2s; }
-  textarea.input-field { min-height: 90px; resize: vertical; }
-  .input-field:focus { outline: none; border-color: var(--blue); }
-
-  .submit-btn { width: 100%; padding: 14px; background: var(--blue); color: white; border: none; border-radius: var(--radius-sm); font-size: 16px; font-family: 'Sarabun', sans-serif; font-weight: 700; cursor: pointer; transition: all 0.2s; margin-top: 1.25rem; display: block; }
-  .submit-btn:hover:not(:disabled) { background: #155fa0; }
-  .submit-btn:disabled { background: var(--gray-300); cursor: not-allowed; }
-
-  .status-bar { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); padding-top: 10px; }
-  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gray-300); flex-shrink: 0; }
-  .status-dot.online { background: var(--green); }
-  .status-dot.error  { background: var(--red); }
+  .input-field { width: 100%; padding: 10px; border: 1px solid var(--gray-300); border-radius: 8px; font-family: 'Sarabun'; }
+  .submit-btn { width: 100%; padding: 14px; background: var(--blue); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-family: 'Sarabun'; margin-top: 1rem; }
+  .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
   /* Dashboard Styles */
-  .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 1.5rem; }
-  .metric { background: white; border-radius: var(--radius); box-shadow: var(--shadow); padding: 1.25rem; }
-  .metric .mlabel { font-size: 13px; color: var(--text-muted); margin-bottom: 4px; }
-  .metric .mval { font-size: 28px; font-weight: 700; color: var(--blue); }
+  .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+  .metric { background: white; padding: 1.5rem; border-radius: var(--radius); box-shadow: var(--shadow); }
+  .metric .mval { font-size: 32px; font-weight: 700; color: var(--blue); }
+  .dash-toolbar { display: flex; gap: 10px; margin-bottom: 1rem; align-items: center; flex-wrap: wrap; }
+  .btn-tool { padding: 8px 16px; border-radius: 6px; border: 1px solid; font-weight: 600; cursor: pointer; font-size: 13px; font-family: 'Sarabun'; }
+  .btn-csv { border-color: #a8dfc0; background: #e6f7ef; color: var(--green); }
+  .btn-json { border-color: #f6cc7a; background: var(--amber-light); color: #92540a; }
+  .btn-danger { border-color: #f5c6c2; background: var(--red-light); color: var(--red); }
 
-  .dash-toolbar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 1.25rem; align-items: center; }
-  .dash-toolbar .spacer { flex: 1; }
-  .tool-btn { padding: 9px 18px; border-radius: 8px; font-family: 'Sarabun', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.18s; border: 1.5px solid; }
-  .btn-csv  { background: #e6f7ef; color: var(--green); border-color: #a8dfc0; }
-  .btn-csv:hover { background: #ccf0de; }
-  .btn-json { background: var(--amber-light); color: #92540a; border-color: #f6cc7a; }
-  .btn-json:hover { background: #fde8a0; }
-  .btn-clear { background: var(--red-light); color: var(--red); border-color: #f5c6c2; }
-  .btn-clear:hover { background: #f8d7da; }
+  .resp-card { background: white; border-radius: 12px; padding: 1rem; margin-bottom: 1rem; border-left: 5px solid #ccc; box-shadow: var(--shadow); position: relative; }
+  .resp-card.star5 { border-left-color: var(--green); }
+  .resp-card.star1 { border-left-color: var(--red); }
 
-  .resp-card { background: white; border-radius: var(--radius); box-shadow: var(--shadow); padding: 1.25rem; border-left: 4px solid var(--gray-300); margin-bottom: 1rem; }
-  .resp-card.hi  { border-left-color: var(--green); }
-  .resp-card.mid { border-left-color: var(--amber); }
-  .resp-card.lo  { border-left-color: var(--red); }
-  .resp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 13px; margin-top: 10px; color: var(--gray-700); }
-
-  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
-  .modal-overlay.active { display: flex; }
-  .modal-box { background: white; padding: 2rem; border-radius: 20px; width: 100%; max-width: 320px; text-align: center; box-shadow: var(--shadow-lg); }
+  /* Modal */
+  .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center; }
+  .modal.active { display: flex; }
+  .modal-box { background: white; padding: 2rem; border-radius: 16px; width: 320px; text-align: center; }
 </style>
 </head>
 <body>
 
 <nav class="top-nav">
   <div class="nav-inner">
-    <div class="nav-logo">💨 ERV Service</div>
+    <div class="nav-logo">💨 ERV Survey System</div>
     <div>
       <button class="tab-btn active" id="btn-survey">หน้าประเมิน</button>
-      <button class="tab-btn" id="btn-dashboard">รีวิวคำตอบ (Admin)</button>
+      <button class="tab-btn" id="btn-dash">Admin Dashboard</button>
     </div>
   </div>
 </nav>
 
+<!-- Survey Panel -->
 <div id="tab-survey" class="panel active">
   <div class="content-wrap">
-    <div class="survey-wrap">
-      <div id="surveyFormUI">
-        <div class="survey-card">
-          <div class="survey-header">
-            <div class="icon">💨</div>
-            <h1>แบบสอบถามความพึงพอใจ<br>การติดตั้งระบบ ERV</h1>
-            <p>ความคิดเห็นของคุณสำคัญต่อเรา</p>
+    <div class="survey-card" id="surveyUI">
+      <div class="survey-header">
+        <h2>ประเมินความพึงพอใจ</h2>
+        <p>บริการติดตั้งระบบ ERV</p>
+      </div>
+      <div class="survey-body">
+        <div class="q-block">
+          <label class="q-label">ชื่อลูกค้า / โครงการ</label>
+          <input type="text" id="custName" class="input-field" placeholder="กรอกชื่อของคุณ">
+        </div>
+        <div class="q-block">
+          <label class="q-label">1. ความพึงพอใจโดยรวม</label>
+          <div class="star-row" id="star-row">
+            <div class="star" data-v="1">⭐</div>
+            <div class="star" data-v="2">⭐</div>
+            <div class="star" data-v="3">⭐</div>
+            <div class="star" data-v="4">⭐</div>
+            <div class="star" data-v="5">⭐</div>
           </div>
-          <div class="survey-body">
-            <div class="q-block">
-              <span class="q-label">ชื่อลูกค้า / โครงการ</span>
-              <input type="text" id="custName" class="input-field" placeholder="ระบุชื่อของคุณ">
-            </div>
-            <div class="q-block">
-              <span class="q-label"><span class="q-num">1.</span> ความพึงพอใจโดยรวม</span>
-              <div class="star-row" id="star-container">
-                <div class="star" data-v="1">⭐</div>
-                <div class="star" data-v="2">⭐</div>
-                <div class="star" data-v="3">⭐</div>
-                <div class="star" data-v="4">⭐</div>
-                <div class="star" data-v="5">⭐</div>
-              </div>
-              <div class="star-hint" id="starHint">แตะดาวเพื่อให้คะแนน</div>
-            </div>
-            <div class="q-block">
-              <span class="q-label"><span class="q-num">2.</span> ความเป็นมืออาชีพของทีมงาน</span>
-              <div class="chip-row" id="q2-row">
-                <button class="chip" data-val="มืออาชีพมาก">มืออาชีพมาก</button>
-                <button class="chip" data-val="ค่อนข้างดี">ค่อนข้างดี</button>
-                <button class="chip" data-val="ปานกลาง">ปานกลาง</button>
-                <button class="chip" data-val="ควรปรับปรุง" data-cls="sel-no">ควรปรับปรุง</button>
-              </div>
-            </div>
-            <div class="q-block">
-              <span class="q-label"><span class="q-num">3.</span> งานติดตั้งเสร็จตรงเวลาหรือไม่?</span>
-              <div class="chip-row" id="q3-row">
-                <button class="chip" data-val="ตรงเวลา">ตรงเวลา</button>
-                <button class="chip" data-val="ล่าช้าเล็กน้อย">ล่าช้าเล็กน้อย</button>
-                <button class="chip" data-val="ล่าช้ามาก" data-cls="sel-no">ล่าช้ามาก</button>
-              </div>
-            </div>
-            <div class="q-block">
-              <span class="q-label"><span class="q-num">4.</span> ความคิดเห็นเพิ่มเติม</span>
-              <textarea id="comment" class="input-field" placeholder="กรุณาแชร์ข้อแนะนำของคุณ..."></textarea>
-            </div>
-            <button class="submit-btn" id="submitBtn" disabled>กำลังตรวจสอบการเชื่อมต่อ...</button>
-            <div class="status-bar">
-              <div class="status-dot" id="connDot"></div>
-              <span id="connText">กำลังเริ่มต้นระบบ...</span>
-            </div>
+          <div class="star-hint" id="starHint">กรุณาเลือกคะแนน</div>
+        </div>
+        <div class="q-block">
+          <label class="q-label">2. ความเป็นมืออาชีพของทีมงาน</label>
+          <div class="chip-row" id="q2-row">
+            <button class="chip" data-v="มืออาชีพมาก">มืออาชีพมาก</button>
+            <button class="chip" data-v="ค่อนข้างดี">ค่อนข้างดี</button>
+            <button class="chip" data-v="ปานกลาง">ปานกลาง</button>
+            <button class="chip" data-v="ควรปรับปรุง" data-cls="sel-no">ควรปรับปรุง</button>
           </div>
         </div>
-      </div>
-
-      <div id="successMsg" style="display:none;">
-        <div class="survey-card" style="padding:3rem 2rem;text-align:center;">
-          <div style="font-size:60px;margin-bottom:10px;">🎉</div>
-          <h2 style="margin-bottom:10px;">ขอบคุณสำหรับความคิดเห็น!</h2>
-          <p style="margin-bottom:20px;color:var(--text-muted);">บันทึกข้อมูลในระบบออนไลน์เรียบร้อยแล้ว ✅</p>
-          <button id="doAgainBtn" style="background:var(--blue);color:white;border:none;padding:12px 28px;border-radius:8px;cursor:pointer;font-family:'Sarabun',sans-serif;font-size:15px;font-weight:600;">ทำแบบสอบถามอีกครั้ง</button>
+        <div class="q-block">
+          <label class="q-label">3. ความตรงต่อเวลา</label>
+          <div class="chip-row" id="q3-row">
+            <button class="chip" data-v="ตรงเวลา">ตรงเวลา</button>
+            <button class="chip" data-v="ล่าช้าเล็กน้อย">ล่าช้าเล็กน้อย</button>
+            <button class="chip" data-v="ล่าช้ามาก" data-cls="sel-no">ล่าช้ามาก</button>
+          </div>
         </div>
+        <div class="q-block">
+          <label class="q-label">4. ข้อเสนอแนะเพิ่มเติม</label>
+          <textarea id="comment" class="input-field" rows="3" placeholder="เขียนความเห็นของคุณที่นี่..."></textarea>
+        </div>
+        <button id="sendBtn" class="submit-btn">ส่งข้อมูล ✓</button>
       </div>
+    </div>
+    <div id="thanksUI" style="display:none; text-align:center; padding:4rem 2rem;">
+      <h1 style="font-size:64px;">✅</h1>
+      <h2>ส่งข้อมูลเรียบร้อยแล้ว!</h2>
+      <p style="color:var(--text-muted); margin:1rem 0;">ขอบคุณที่ไว้วางใจใช้บริการของเรา</p>
+      <button onclick="location.reload()" class="submit-btn" style="max-width:200px;">กลับหน้าหลัก</button>
     </div>
   </div>
 </div>
 
-<div id="tab-dashboard" class="panel">
+<!-- Dashboard Panel -->
+<div id="tab-dash" class="panel">
   <div class="content-wrap">
     <div class="metrics">
-      <div class="metric"><div class="mlabel">คำตอบทั้งหมด</div><div class="mval" id="m-total">—</div></div>
-      <div class="metric"><div class="mlabel">คะแนนเฉลี่ย</div><div class="mval" id="m-avg">—</div></div>
-      <div class="metric"><div class="mlabel">5 ดาว</div><div class="mval" id="m-five">—</div></div>
-      <div class="metric"><div class="mlabel">ตรงเวลา</div><div class="mval" id="m-ontime">—</div></div>
+      <div class="metric">
+        <div style="font-size:12px; color:var(--text-muted);">จำนวนแบบสอบถาม</div>
+        <div class="mval" id="m-count">0</div>
+      </div>
+      <div class="metric">
+        <div style="font-size:12px; color:var(--text-muted);">คะแนนเฉลี่ย</div>
+        <div class="mval" id="m-avg">0.0</div>
+      </div>
     </div>
+
     <div class="dash-toolbar">
-      <strong style="font-size:14px;color:var(--text-muted);">ส่งออกข้อมูล:</strong>
-      <button class="tool-btn btn-csv"  id="exportCsv">📊 Export CSV</button>
-      <button class="tool-btn btn-json" id="exportJson">📋 Export JSON</button>
-      <div class="spacer"></div>
-      <button class="tool-btn btn-clear" id="clearBtn">🗑 ลบทั้งหมด</button>
+      <button class="btn-tool btn-csv" id="btnCsv">Export CSV</button>
+      <button class="btn-tool btn-json" id="btnJson">Export JSON</button>
+      <div style="flex:1"></div>
+      <button class="btn-tool btn-danger" id="btnClear">🗑 ล้างข้อมูลทั้งหมด</button>
     </div>
-    <div id="responseList">
-      <div style="text-align:center;padding:40px;color:var(--gray-500);background:white;border-radius:12px;">กำลังโหลดข้อมูล...</div>
+
+    <div id="dataList">
+      <div style="text-align:center; padding:3rem; color:var(--gray-500);">กำลังเชื่อมต่อฐานข้อมูล...</div>
     </div>
   </div>
 </div>
 
-<div id="authModal" class="modal-overlay">
+<!-- Admin Login Modal -->
+<div id="authModal" class="modal">
   <div class="modal-box">
-    <div style="font-size:32px;margin-bottom:12px;">🔐</div>
-    <h3 style="margin-bottom:8px;">Admin Login</h3>
-    <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">กรุณากรอกรหัสผ่านเพื่อดูสรุปผล</p>
-    <input type="password" id="adminPass" class="input-field" style="text-align:center;margin-bottom:12px;" placeholder="รหัสผ่าน">
-    <button class="submit-btn" id="authConfirm" style="margin-top:0;">ตกลง</button>
-    <button id="authCancel" style="margin-top:10px;background:none;border:none;color:var(--gray-500);cursor:pointer;font-family:'Sarabun',sans-serif;font-size:14px;display:block;width:100%;">ยกเลิก</button>
+    <h3 style="margin-bottom:1rem;">เข้าสู่ระบบ Admin</h3>
+    <input type="password" id="passInput" class="input-field" placeholder="รหัสผ่าน" style="text-align:center; margin-bottom:1rem;">
+    <button id="authBtn" class="submit-btn" style="margin-top:0;">ตกลง</button>
+    <button id="closeAuth" style="background:none; border:none; margin-top:10px; color:#999; cursor:pointer;">ยกเลิก</button>
   </div>
 </div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-  import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, getDocs, deleteDoc, doc }
+  import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+  import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, getDocs, deleteDoc, doc, writeBatch } 
     from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-  // *** สำคัญมาก: กรุณากรอก Config ของคุณตรงนี้ ***
   const firebaseConfig = {
-    apiKey:            "AIzaSy...", // วาง API Key ของคุณ
-    authDomain:        "your-project.firebaseapp.com",
-    projectId:         "your-project",
-    storageBucket:     "your-project.appspot.com",
-    messagingSenderId: "123456789",
-    appId:             "1:123456789:web:abcdef"
+    apiKey: "AIzaSyCrP6AIvPcs8ORHBdYJYfkbZJsGn-1Hkqg",
+    authDomain: "erv-survey.firebaseapp.com",
+    projectId: "erv-survey",
+    storageBucket: "erv-survey.firebasestorage.app",
+    messagingSenderId: "367636638742",
+    appId: "1:367636638742:web:2a9279b6f528204c099937"
   };
 
-  const ADMIN_CODE = "Coral789";
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
   const COLLECTION = "erv_surveys";
+  const colRef = collection(db, COLLECTION);
 
-  let db, col;
-  let state      = { star: 0, q2: '', q3: '' };
+  // Initialize Anonymous Auth (Silent)
+  signInAnonymously(auth).catch(e => console.log("Login offline/disabled"));
+
+  let state = { star: 0, q2: '', q3: '' };
   let cachedData = [];
-  let unsubDash  = null;
-  let connected  = false;
 
-  function setStatus(ok, msg) {
-    connected = ok;
-    const dot = document.getElementById('connDot');
-    const txt = document.getElementById('connText');
-    const btn = document.getElementById('submitBtn');
-    
-    if(dot) dot.className = 'status-dot ' + (ok ? 'online' : 'error');
-    if(txt) txt.textContent = msg;
-    if(btn) {
-        btn.disabled = !ok;
-        if (!ok && msg.includes('ตรวจสอบ')) btn.textContent = msg;
-        else if (ok) btn.textContent = 'ส่งแบบสอบถาม ✓';
-    }
-  }
+  // Tab Logic
+  document.getElementById('btn-survey').onclick = () => switchTab('survey');
+  document.getElementById('btn-dash').onclick = () => document.getElementById('authModal').classList.add('active');
+  document.getElementById('closeAuth').onclick = () => document.getElementById('authModal').classList.remove('active');
 
-  // Initialize Firebase with Error Handling
-  try {
-    if (firebaseConfig.apiKey === "AIzaSy...") {
-        setStatus(false, "กรุณาตั้งค่า Firebase Config ในโค้ดก่อนใช้งาน");
-    } else {
-        const app = initializeApp(firebaseConfig);
-        db  = getFirestore(app);
-        col = collection(db, COLLECTION);
-        
-        // Listen for connection once (Fixed loop)
-        onSnapshot(col, () => {
-            if(!connected) setStatus(true, 'เชื่อมต่อ Firebase สำเร็จ ✓');
-        }, err => {
-            setStatus(false, 'Firebase Error: ' + err.code);
-        });
-    }
-  } catch (e) {
-    setStatus(false, "Config Error: " + e.message);
-  }
-
-  // ── Tab switching ─────────────────────────────────────────────────
-  function switchTab(name) {
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('tab-' + name).classList.add('active');
-    document.getElementById('btn-' + name).classList.add('active');
-    if (name === 'dashboard') startDashboard();
-  }
-
-  document.getElementById('btn-survey').addEventListener('click', () => switchTab('survey'));
-  document.getElementById('btn-dashboard').addEventListener('click', () => {
-    if (document.getElementById('tab-dashboard').classList.contains('active')) return;
-    document.getElementById('authModal').classList.add('active');
-    setTimeout(() => document.getElementById('adminPass').focus(), 60);
-  });
-
-  document.getElementById('authCancel').addEventListener('click', () => {
-    document.getElementById('authModal').classList.remove('active');
-    document.getElementById('adminPass').value = '';
-  });
-
-  document.getElementById('authConfirm').addEventListener('click', checkAuth);
-  document.getElementById('adminPass').addEventListener('keydown', e => { if (e.key === 'Enter') checkAuth(); });
-
-  function checkAuth() {
-    if (document.getElementById('adminPass').value === ADMIN_CODE) {
-      document.getElementById('authModal').classList.remove('active');
-      document.getElementById('adminPass').value = '';
-      switchTab('dashboard');
-    } else {
-      alert('รหัสผ่านไม่ถูกต้อง');
-    }
-  }
-
-  // ── Star Rating Logic ─────────────────────────────────────────────
+  // Star Logic
   document.querySelectorAll('.star').forEach(el => {
-    el.addEventListener('click', () => {
-      const v = parseInt(el.dataset.v);
-      state.star = v;
-      document.querySelectorAll('.star').forEach((s, i) => s.classList.toggle('on', i < v));
-      document.getElementById('starHint').textContent =
-        ['','ต้องปรับปรุง','พอใช้','ปานกลาง','ดีมาก','ยอดเยี่ยม!'][v];
-    });
+    el.onclick = () => {
+      state.star = parseInt(el.dataset.v);
+      document.querySelectorAll('.star').forEach((s, i) => s.classList.toggle('on', i < state.star));
+      document.getElementById('starHint').textContent = ['','ต้องปรับปรุง','พอใช้','ปานกลาง','ดีมาก','ยอดเยี่ยม!'][state.star];
+    };
   });
 
-  // ── Chip Selection Logic ──────────────────────────────────────────
-  function setupChips(rowId, key) {
-    document.querySelectorAll('#' + rowId + ' .chip').forEach(el => {
-      el.addEventListener('click', () => {
-        state[key] = el.dataset.val;
-        document.querySelectorAll('#' + rowId + ' .chip').forEach(c => c.classList.remove('sel','sel-no'));
+  // Chip Logic
+  function bindChips(rowId, key) {
+    document.querySelectorAll(`#${rowId} .chip`).forEach(el => {
+      el.onclick = () => {
+        state[key] = el.dataset.v;
+        document.querySelectorAll(`#${rowId} .chip`).forEach(c => c.classList.remove('sel', 'sel-no'));
         el.classList.add(el.dataset.cls || 'sel');
-      });
+      };
     });
   }
-  setupChips('q2-row', 'q2');
-  setupChips('q3-row', 'q3');
+  bindChips('q2-row', 'q2');
+  bindChips('q3-row', 'q3');
 
-  // ── Submit Logic ──────────────────────────────────────────────────
-  document.getElementById('submitBtn').addEventListener('click', async () => {
-    if (!connected) return;
+  // Send Data
+  document.getElementById('sendBtn').onclick = async () => {
     const name = document.getElementById('custName').value.trim();
-    if (!name)       { alert('กรุณาระบุชื่อลูกค้า'); return; }
-    if (!state.star) { alert('กรุณาให้คะแนนดาว');    return; }
+    if (!name || state.star === 0) return alert('กรุณาระบุชื่อและให้คะแนนครับ');
 
-    const btn = document.getElementById('submitBtn');
-    btn.disabled = true; btn.textContent = 'กำลังส่ง...';
+    const btn = document.getElementById('sendBtn');
+    btn.disabled = true;
+    btn.textContent = 'กำลังส่ง...';
 
     try {
-      await addDoc(col, {
+      await addDoc(colRef, {
         customer_name: name,
-        star:          state.star,
-        q2_pro:        state.q2  || 'ไม่ได้ระบุ',
-        q3_time:       state.q3  || 'ไม่ได้ระบุ',
-        comment:       document.getElementById('comment').value.trim(),
-        timestamp:     serverTimestamp()
+        star: state.star,
+        q2_pro: state.q2 || 'ปานกลาง',
+        q3_time: state.q3 || 'ตรงเวลา',
+        comment: document.getElementById('comment').value.trim(),
+        timestamp: serverTimestamp()
       });
-      document.getElementById('surveyFormUI').style.display = 'none';
-      document.getElementById('successMsg').style.display   = 'block';
+      document.getElementById('surveyUI').style.display = 'none';
+      document.getElementById('thanksUI').style.display = 'block';
     } catch (e) {
-      alert('บันทึกไม่สำเร็จ: ' + e.message);
-      btn.disabled = false; btn.textContent = 'ส่งแบบสอบถาม ✓';
+      alert('Error: ' + e.message);
+      btn.disabled = false;
+      btn.textContent = 'ส่งข้อมูล ✓';
     }
-  });
+  };
 
-  document.getElementById('doAgainBtn').addEventListener('click', () => {
-    document.getElementById('surveyFormUI').style.display = 'block';
-    document.getElementById('successMsg').style.display   = 'none';
-    document.getElementById('custName').value  = '';
-    document.getElementById('comment').value   = '';
-    document.getElementById('starHint').textContent = 'แตะดาวเพื่อให้คะแนน';
-    document.querySelectorAll('.star').forEach(s => s.classList.remove('on'));
-    document.querySelectorAll('.chip').forEach(c => c.classList.remove('sel','sel-no'));
-    state = { star: 0, q2: '', q3: '' };
-    setStatus(connected, connected ? 'เชื่อมต่อ Firebase สำเร็จ ✓' : 'รอกำลังเชื่อมต่อ...');
-  });
+  // Dashboard & Admin
+  document.getElementById('authBtn').onclick = () => {
+    if (document.getElementById('passInput').value === "Coral789") {
+      document.getElementById('authModal').classList.remove('active');
+      switchTab('dash');
+      initDash();
+    } else alert('รหัสผ่านไม่ถูกต้อง');
+  };
 
-  // ── Admin Dashboard Logic ─────────────────────────────────────────
-  function startDashboard() {
-    if (unsubDash || !col) return;
-    const q = query(col, orderBy('timestamp', 'desc'));
-    unsubDash = onSnapshot(q, snap => {
-      cachedData = snap.docs.map(d => ({ _id: d.id, ...d.data() }));
-      renderDashboard(cachedData);
-    }, err => {
-      document.getElementById('responseList').innerHTML =
-        `<div style="color:var(--red);text-align:center;padding:24px;background:white;border-radius:12px;">ดึงข้อมูลไม่ได้: ${err.message}</div>`;
+  function switchTab(t) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === `tab-${t}`));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.id === `btn-${t}`));
+  }
+
+  function initDash() {
+    const q = query(colRef, orderBy('timestamp', 'desc'));
+    onSnapshot(q, (snap) => {
+      cachedData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderDash();
+    }, (err) => {
+      document.getElementById('dataList').innerHTML = `<div style="color:red; text-align:center;">ไม่สามารถเข้าถึงข้อมูลได้: ${err.message}</div>`;
     });
   }
 
-  function renderDashboard(data) {
-    const total    = data.length;
-    const avg      = total ? (data.reduce((s,r) => s + (r.star||0), 0) / total).toFixed(1) : '—';
-    const fiveStar = data.filter(r => r.star === 5).length;
-    const onTime   = data.filter(r => r.q3_time === 'ตรงเวลา').length;
+  function renderDash() {
+    const total = cachedData.length;
+    const avg = total ? (cachedData.reduce((s, r) => s + (r.star || 0), 0) / total).toFixed(1) : '0.0';
+    document.getElementById('m-count').textContent = total;
+    document.getElementById('m-avg').textContent = avg;
 
-    document.getElementById('m-total').textContent  = total || '0';
-    document.getElementById('m-avg').textContent    = avg;
-    document.getElementById('m-five').textContent   = fiveStar;
-    document.getElementById('m-ontime').textContent = onTime;
-
-    const list = document.getElementById('responseList');
+    const list = document.getElementById('dataList');
     if (!total) {
-      list.innerHTML = '<div style="text-align:center;padding:40px;color:#aaa;background:white;border-radius:12px;">ยังไม่มีข้อมูลการประเมินในระบบ</div>';
+      list.innerHTML = '<div style="text-align:center; padding:3rem; color:#999;">ยังไม่มีข้อมูล</div>';
       return;
     }
-    list.innerHTML = data.map(r => {
-      const stars = r.star || 0;
-      const cls   = stars >= 4 ? 'hi' : stars === 3 ? 'mid' : 'lo';
-      const date  = r.timestamp ? new Date(r.timestamp.seconds * 1000).toLocaleString('th-TH') : 'กำลังบันทึก...';
-      return `<div class="resp-card ${cls}">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-          <strong style="font-size:15px;">${esc(r.customer_name||'ไม่ระบุชื่อ')}</strong>
-          <span style="font-size:11px;color:#888;">${date}</span>
+
+    list.innerHTML = cachedData.map(r => {
+      const date = r.timestamp ? new Date(r.timestamp.seconds * 1000).toLocaleString('th-TH') : '...';
+      return `
+        <div class="resp-card star${r.star === 5 ? '5' : r.star === 1 ? '1' : ''}">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <div>
+              <strong>${r.customer_name}</strong>
+              <div style="font-size:13px; color:var(--blue); margin-top:4px;">${'⭐'.repeat(r.star)} (${r.star} ดาว)</div>
+            </div>
+            <div style="font-size:11px; color:#999;">${date}</div>
+          </div>
+          <div style="font-size:13px; margin-top:10px; display:grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+            <div>ทีมงาน: ${r.q2_pro}</div>
+            <div>เวลา: ${r.q3_time}</div>
+          </div>
+          ${r.comment ? `<div style="margin-top:8px; padding-top:8px; border-top:1px dashed #eee; font-size:13px; font-style:italic;">"${r.comment}"</div>` : ''}
         </div>
-        <div class="resp-grid">
-          <div>คะแนน: ${'⭐'.repeat(stars)}</div>
-          <div>ทีมงาน: ${esc(r.q2_pro)}</div>
-          <div>เวลา: ${esc(r.q3_time)}</div>
-        </div>
-        ${r.comment ? `<div style="margin-top:8px;font-size:13px;font-style:italic;color:var(--gray-700);border-top:1px dashed #eee;padding-top:6px;">💬 "${esc(r.comment)}"</div>` : ''}
-      </div>`;
+      `;
     }).join('');
   }
 
-  function esc(s) {
-    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
+  // FORCE DELETE ALL (ปรับปรุงใหม่)
+  document.getElementById('btnClear').onclick = async () => {
+    if (!cachedData.length) return alert('ไม่มีข้อมูลให้ลบ');
+    if (!confirm('ยืนยันลบข้อมูลทั้งหมด "ถาวร" ใช่หรือไม่?')) return;
 
-  // ── Export Features ───────────────────────────────────────────────
-  document.getElementById('exportCsv').addEventListener('click', () => {
-    if (!cachedData.length) { alert('ยังไม่มีข้อมูล'); return; }
-    const headers = ['ลำดับ','ชื่อลูกค้า','คะแนนดาว','ความเป็นมืออาชีพ','ตรงเวลา','ความคิดเห็น','วันที่บันทึก'];
-    const rows = cachedData.map((r, i) => [
-      i + 1,
-      cell(r.customer_name),
-      r.star || 0,
-      cell(r.q2_pro),
-      cell(r.q3_time),
-      cell(r.comment),
-      r.timestamp ? new Date(r.timestamp.seconds * 1000).toLocaleString('th-TH') : ''
-    ]);
-    const csv = '\uFEFF' + [headers, ...rows].map(row => row.join(',')).join('\r\n');
-    download(csv, 'erv-survey-' + stamp() + '.csv', 'text/csv;charset=utf-8;');
-  });
+    const btn = document.getElementById('btnClear');
+    btn.disabled = true;
+    btn.textContent = 'กำลังลบ...';
 
-  document.getElementById('exportJson').addEventListener('click', () => {
-    if (!cachedData.length) { alert('ยังไม่มีข้อมูล'); return; }
-    const clean = cachedData.map((r, i) => ({
-      no: i + 1,
-      customer_name: r.customer_name || '',
-      star: r.star || 0,
-      q2_pro: r.q2_pro  || '',
-      q3_time: r.q3_time || '',
-      comment: r.comment || '',
-      timestamp: r.timestamp ? new Date(r.timestamp.seconds * 1000).toISOString() : null
-    }));
-    const json = JSON.stringify({ exported_at: new Date().toISOString(), total: clean.length, data: clean }, null, 2);
-    download(json, 'erv-survey-' + stamp() + '.json', 'application/json');
-  });
-
-  document.getElementById('clearBtn').addEventListener('click', async () => {
-    if (!cachedData.length) { alert('ไม่มีข้อมูล'); return; }
-    if (!confirm(`ต้องการลบข้อมูลทั้งหมด ${cachedData.length} รายการหรือไม่?\n(ไม่สามารถกู้คืนได้)`)) return;
     try {
-      const snap = await getDocs(col);
-      await Promise.all(snap.docs.map(d => deleteDoc(doc(db, COLLECTION, d.id))));
-      cachedData = [];
-      renderDashboard([]);
-    } catch (e) { alert('ลบไม่สำเร็จ: ' + e.message); }
-  });
+      // 1. ลองลบแบบทีละรายการเพื่อให้มั่นใจ
+      const snap = await getDocs(colRef);
+      if (snap.empty) {
+        alert('ฐานข้อมูลว่างเปล่าอยู่แล้ว');
+        return;
+      }
 
-  function cell(v) {
-    const s = String(v||'').replace(/"/g,'""');
-    return (s.includes(',') || s.includes('"') || s.includes('\n')) ? `"${s}"` : s;
-  }
+      const promises = snap.docs.map(d => deleteDoc(doc(db, COLLECTION, d.id)));
+      await Promise.all(promises);
+      
+      alert('ลบเรียบร้อยแล้ว!');
+    } catch (e) {
+      console.error(e);
+      alert('ลบไม่สำเร็จ! \n\nสาเหตุที่เป็นไปได้: \n1. Security Rules ยังไม่อนุญาตให้ลบ \n2. อินเทอร์เน็ตมีปัญหา \n\nรายละเอียด Error: ' + e.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '🗑 ล้างข้อมูลทั้งหมด';
+    }
+  };
 
-  function download(content, filename, mime) {
-    const blob = new Blob([content], { type: mime });
+  // Export Logic
+  document.getElementById('btnCsv').onclick = () => {
+    if (!cachedData.length) return;
+    const csv = "\uFEFFลำดับ,วันที่,ชื่อลูกค้า,คะแนน,ทีมงาน,เวลา,ความเห็น\n" + 
+      cachedData.map((r,i) => {
+        const d = r.timestamp ? new Date(r.timestamp.seconds*1000).toLocaleDateString() : '';
+        return `${i+1},${d},"${r.customer_name}",${r.star},${r.q2_pro},${r.q3_time},"${r.comment || ''}"`
+      }).join("\n");
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }
+    a.href = url; a.download = 'erv-survey-data.csv'; a.click();
+  };
 
-  function stamp() {
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-  }
+  document.getElementById('btnJson').onclick = () => {
+    if (!cachedData.length) return;
+    const blob = new Blob([JSON.stringify(cachedData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'erv-survey-data.json'; a.click();
+  };
 </script>
 </body>
 </html>
