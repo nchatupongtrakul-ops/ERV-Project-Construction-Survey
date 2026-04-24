@@ -66,6 +66,7 @@
   .status-dot.online { background: var(--green); }
   .status-dot.error  { background: var(--red); }
 
+  /* Dashboard Styles */
   .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 1.5rem; }
   .metric { background: white; border-radius: var(--radius); box-shadow: var(--shadow); padding: 1.25rem; }
   .metric .mlabel { font-size: 13px; color: var(--text-muted); margin-bottom: 4px; }
@@ -104,7 +105,6 @@
   </div>
 </nav>
 
-<!-- SURVEY PANEL -->
 <div id="tab-survey" class="panel active">
   <div class="content-wrap">
     <div class="survey-wrap">
@@ -152,10 +152,10 @@
               <span class="q-label"><span class="q-num">4.</span> ความคิดเห็นเพิ่มเติม</span>
               <textarea id="comment" class="input-field" placeholder="กรุณาแชร์ข้อแนะนำของคุณ..."></textarea>
             </div>
-            <button class="submit-btn" id="submitBtn">ส่งแบบสอบถาม ✓</button>
+            <button class="submit-btn" id="submitBtn" disabled>กำลังตรวจสอบการเชื่อมต่อ...</button>
             <div class="status-bar">
               <div class="status-dot" id="connDot"></div>
-              <span id="connText">กำลังเชื่อมต่อ Firebase...</span>
+              <span id="connText">กำลังเริ่มต้นระบบ...</span>
             </div>
           </div>
         </div>
@@ -173,7 +173,6 @@
   </div>
 </div>
 
-<!-- DASHBOARD PANEL -->
 <div id="tab-dashboard" class="panel">
   <div class="content-wrap">
     <div class="metrics">
@@ -195,7 +194,6 @@
   </div>
 </div>
 
-<!-- AUTH MODAL -->
 <div id="authModal" class="modal-overlay">
   <div class="modal-box">
     <div style="font-size:32px;margin-bottom:12px;">🔐</div>
@@ -212,49 +210,59 @@
   import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, getDocs, deleteDoc, doc }
     from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-  /* ================================================================
-     🔧 STEP 1 — PASTE YOUR FIREBASE CONFIG HERE
-     Firebase Console → Project Settings → Your apps → Web (</>)
-     ================================================================ */
+  // *** สำคัญมาก: กรุณากรอก Config ของคุณตรงนี้ ***
   const firebaseConfig = {
-    apiKey:            "YOUR_API_KEY",
-    authDomain:        "YOUR_PROJECT_ID.firebaseapp.com",
-    projectId:         "YOUR_PROJECT_ID",
-    storageBucket:     "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId:             "YOUR_APP_ID"
+    apiKey:            "AIzaSy...", // วาง API Key ของคุณ
+    authDomain:        "your-project.firebaseapp.com",
+    projectId:         "your-project",
+    storageBucket:     "your-project.appspot.com",
+    messagingSenderId: "123456789",
+    appId:             "1:123456789:web:abcdef"
   };
 
-  /* ================================================================
-     🔧 STEP 2 — SET YOUR ADMIN PASSWORD
-     ================================================================ */
   const ADMIN_CODE = "Coral789";
-
-  /* ================================================================
-     🔧 STEP 3 — COLLECTION NAME (leave as-is or rename)
-     ================================================================ */
   const COLLECTION = "erv_surveys";
 
-  // ── Init ─────────────────────────────────────────────────────────
-  const app = initializeApp(firebaseConfig);
-  const db  = getFirestore(app);
-  const col = collection(db, COLLECTION);
-
+  let db, col;
   let state      = { star: 0, q2: '', q3: '' };
   let cachedData = [];
   let unsubDash  = null;
   let connected  = false;
 
-  // ── Connection status indicator ───────────────────────────────────
   function setStatus(ok, msg) {
     connected = ok;
-    document.getElementById('connDot').className    = 'status-dot ' + (ok ? 'online' : 'error');
-    document.getElementById('connText').textContent = msg;
-    document.getElementById('submitBtn').disabled   = !ok;
+    const dot = document.getElementById('connDot');
+    const txt = document.getElementById('connText');
+    const btn = document.getElementById('submitBtn');
+    
+    if(dot) dot.className = 'status-dot ' + (ok ? 'online' : 'error');
+    if(txt) txt.textContent = msg;
+    if(btn) {
+        btn.disabled = !ok;
+        if (!ok && msg.includes('ตรวจสอบ')) btn.textContent = msg;
+        else if (ok) btn.textContent = 'ส่งแบบสอบถาม ✓';
+    }
   }
 
-  const probe = onSnapshot(col, () => { setStatus(true,  'เชื่อมต่อ Firebase สำเร็จ ✓'); probe(); },
-                                  err => { setStatus(false, 'เชื่อมต่อไม่ได้: ' + err.code);   probe(); });
+  // Initialize Firebase with Error Handling
+  try {
+    if (firebaseConfig.apiKey === "AIzaSy...") {
+        setStatus(false, "กรุณาตั้งค่า Firebase Config ในโค้ดก่อนใช้งาน");
+    } else {
+        const app = initializeApp(firebaseConfig);
+        db  = getFirestore(app);
+        col = collection(db, COLLECTION);
+        
+        // Listen for connection once (Fixed loop)
+        onSnapshot(col, () => {
+            if(!connected) setStatus(true, 'เชื่อมต่อ Firebase สำเร็จ ✓');
+        }, err => {
+            setStatus(false, 'Firebase Error: ' + err.code);
+        });
+    }
+  } catch (e) {
+    setStatus(false, "Config Error: " + e.message);
+  }
 
   // ── Tab switching ─────────────────────────────────────────────────
   function switchTab(name) {
@@ -271,10 +279,12 @@
     document.getElementById('authModal').classList.add('active');
     setTimeout(() => document.getElementById('adminPass').focus(), 60);
   });
+
   document.getElementById('authCancel').addEventListener('click', () => {
     document.getElementById('authModal').classList.remove('active');
     document.getElementById('adminPass').value = '';
   });
+
   document.getElementById('authConfirm').addEventListener('click', checkAuth);
   document.getElementById('adminPass').addEventListener('keydown', e => { if (e.key === 'Enter') checkAuth(); });
 
@@ -288,7 +298,7 @@
     }
   }
 
-  // ── Stars ─────────────────────────────────────────────────────────
+  // ── Star Rating Logic ─────────────────────────────────────────────
   document.querySelectorAll('.star').forEach(el => {
     el.addEventListener('click', () => {
       const v = parseInt(el.dataset.v);
@@ -299,7 +309,7 @@
     });
   });
 
-  // ── Chips ─────────────────────────────────────────────────────────
+  // ── Chip Selection Logic ──────────────────────────────────────────
   function setupChips(rowId, key) {
     document.querySelectorAll('#' + rowId + ' .chip').forEach(el => {
       el.addEventListener('click', () => {
@@ -312,8 +322,9 @@
   setupChips('q2-row', 'q2');
   setupChips('q3-row', 'q3');
 
-  // ── Submit ────────────────────────────────────────────────────────
+  // ── Submit Logic ──────────────────────────────────────────────────
   document.getElementById('submitBtn').addEventListener('click', async () => {
+    if (!connected) return;
     const name = document.getElementById('custName').value.trim();
     if (!name)       { alert('กรุณาระบุชื่อลูกค้า'); return; }
     if (!state.star) { alert('กรุณาให้คะแนนดาว');    return; }
@@ -338,7 +349,6 @@
     }
   });
 
-  // ── Reset form ────────────────────────────────────────────────────
   document.getElementById('doAgainBtn').addEventListener('click', () => {
     document.getElementById('surveyFormUI').style.display = 'block';
     document.getElementById('successMsg').style.display   = 'none';
@@ -348,13 +358,12 @@
     document.querySelectorAll('.star').forEach(s => s.classList.remove('on'));
     document.querySelectorAll('.chip').forEach(c => c.classList.remove('sel','sel-no'));
     state = { star: 0, q2: '', q3: '' };
-    const btn = document.getElementById('submitBtn');
-    btn.disabled = !connected; btn.textContent = 'ส่งแบบสอบถาม ✓';
+    setStatus(connected, connected ? 'เชื่อมต่อ Firebase สำเร็จ ✓' : 'รอกำลังเชื่อมต่อ...');
   });
 
-  // ── Dashboard realtime listener ───────────────────────────────────
+  // ── Admin Dashboard Logic ─────────────────────────────────────────
   function startDashboard() {
-    if (unsubDash) return;
+    if (unsubDash || !col) return;
     const q = query(col, orderBy('timestamp', 'desc'));
     unsubDash = onSnapshot(q, snap => {
       cachedData = snap.docs.map(d => ({ _id: d.id, ...d.data() }));
@@ -404,10 +413,9 @@
     return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
-  // ── Export CSV ────────────────────────────────────────────────────
+  // ── Export Features ───────────────────────────────────────────────
   document.getElementById('exportCsv').addEventListener('click', () => {
     if (!cachedData.length) { alert('ยังไม่มีข้อมูล'); return; }
-
     const headers = ['ลำดับ','ชื่อลูกค้า','คะแนนดาว','ความเป็นมืออาชีพ','ตรงเวลา','ความคิดเห็น','วันที่บันทึก'];
     const rows = cachedData.map((r, i) => [
       i + 1,
@@ -418,35 +426,25 @@
       cell(r.comment),
       r.timestamp ? new Date(r.timestamp.seconds * 1000).toLocaleString('th-TH') : ''
     ]);
-
     const csv = '\uFEFF' + [headers, ...rows].map(row => row.join(',')).join('\r\n');
     download(csv, 'erv-survey-' + stamp() + '.csv', 'text/csv;charset=utf-8;');
   });
 
-  function cell(v) {
-    const s = String(v||'').replace(/"/g,'""');
-    return (s.includes(',') || s.includes('"') || s.includes('\n')) ? `"${s}"` : s;
-  }
-
-  // ── Export JSON ───────────────────────────────────────────────────
   document.getElementById('exportJson').addEventListener('click', () => {
     if (!cachedData.length) { alert('ยังไม่มีข้อมูล'); return; }
-
     const clean = cachedData.map((r, i) => ({
-      no:            i + 1,
+      no: i + 1,
       customer_name: r.customer_name || '',
-      star:          r.star || 0,
-      q2_pro:        r.q2_pro  || '',
-      q3_time:       r.q3_time || '',
-      comment:       r.comment || '',
-      timestamp:     r.timestamp ? new Date(r.timestamp.seconds * 1000).toISOString() : null
+      star: r.star || 0,
+      q2_pro: r.q2_pro  || '',
+      q3_time: r.q3_time || '',
+      comment: r.comment || '',
+      timestamp: r.timestamp ? new Date(r.timestamp.seconds * 1000).toISOString() : null
     }));
-
     const json = JSON.stringify({ exported_at: new Date().toISOString(), total: clean.length, data: clean }, null, 2);
     download(json, 'erv-survey-' + stamp() + '.json', 'application/json');
   });
 
-  // ── Clear all ─────────────────────────────────────────────────────
   document.getElementById('clearBtn').addEventListener('click', async () => {
     if (!cachedData.length) { alert('ไม่มีข้อมูล'); return; }
     if (!confirm(`ต้องการลบข้อมูลทั้งหมด ${cachedData.length} รายการหรือไม่?\n(ไม่สามารถกู้คืนได้)`)) return;
@@ -458,15 +456,21 @@
     } catch (e) { alert('ลบไม่สำเร็จ: ' + e.message); }
   });
 
-  // ── Helpers ───────────────────────────────────────────────────────
+  function cell(v) {
+    const s = String(v||'').replace(/"/g,'""');
+    return (s.includes(',') || s.includes('"') || s.includes('\n')) ? `"${s}"` : s;
+  }
+
   function download(content, filename, mime) {
-    const a = Object.assign(document.createElement('a'), {
-      href:     URL.createObjectURL(new Blob([content], { type: mime })),
-      download: filename
-    });
+    const blob = new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   }
 
   function stamp() {
