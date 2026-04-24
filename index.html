@@ -20,6 +20,7 @@
     --bg-light: #fafbfd;
     --radius-lg: 30px;
     --shadow-premium: 0 15px 45px rgba(244, 143, 177, 0.1);
+    --danger: #ff5252;
   }
   
   body { 
@@ -35,15 +36,17 @@
     backdrop-filter: blur(15px);
     position: sticky; top: 0; z-index: 100; 
     border-bottom: 1px solid rgba(244, 143, 177, 0.2);
-    padding: 15px 0;
+    padding: 10px 0;
   }
   .nav-inner { 
     max-width: 1000px; margin: 0 auto; padding: 0 1.5rem; 
     display: flex; align-items: center; justify-content: space-between; 
   }
-  .brand-group { display: flex; flex-direction: column; line-height: 1.2; }
-  .nav-logo-text { font-weight: 800; color: var(--coral-main); font-size: 22px; letter-spacing: 1px; }
-  .nav-tagline { font-size: 10px; font-weight: 600; color: var(--text-medium); letter-spacing: 0.5px; margin-top: 2px; }
+  .brand-group { display: flex; align-items: center; gap: 12px; }
+  .logo-img { height: 45px; width: auto; object-fit: contain; }
+  .brand-text-group { display: flex; flex-direction: column; line-height: 1.2; }
+  .nav-logo-text { font-weight: 800; color: var(--coral-main); font-size: 20px; letter-spacing: 0.5px; }
+  .nav-tagline { font-size: 9px; font-weight: 600; color: var(--text-medium); letter-spacing: 0.5px; margin-top: 1px; }
 
   .tab-group { display: flex; gap: 4px; background: var(--pastel-blue); padding: 4px; border-radius: 14px; }
   .tab-btn { 
@@ -66,7 +69,7 @@
   }
   .header-banner { 
     background: linear-gradient(135deg, #fff 0%, var(--coral-soft) 100%); 
-    color: var(--text-dark); padding: 4rem 2rem; text-align: center;
+    color: var(--text-dark); padding: 3rem 2rem; text-align: center;
   }
   .header-banner h1 { font-size: 28px; font-weight: 700; color: var(--coral-main); margin-bottom: 8px; }
 
@@ -102,6 +105,16 @@
     box-shadow: 0 8px 25px rgba(244, 143, 177, 0.3);
   }
   .btn-submit:hover { background: #ec407a; transform: translateY(-2px); }
+  
+  .btn-secondary {
+    background: #f1f2f6; color: var(--text-dark); border: none; padding: 10px 20px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: 0.2s;
+  }
+  .btn-secondary:hover { background: #dfe4ea; }
+
+  .btn-danger {
+    background: var(--danger); color: white; border: none; padding: 10px 20px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: 0.2s;
+  }
+  .btn-danger:hover { opacity: 0.8; }
 
   .grid-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 30px; }
   .stat-card { background: var(--white); padding: 1.5rem; border-radius: 20px; box-shadow: var(--shadow-premium); text-align: center; border-bottom: 4px solid var(--pastel-blue); }
@@ -119,6 +132,9 @@
   .overlay.active { display: flex; }
   .login-box { background: white; padding: 3rem; border-radius: 35px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 25px 60px rgba(0,0,0,0.1); }
 
+  /* Modal สำหรับยืนยันการลบ */
+  #modal-confirm { z-index: 2000; }
+
   @media (max-width: 600px) { .grid-metrics { grid-template-columns: 1fr 1fr; } .stat-card:first-child { grid-column: span 2; } }
 </style>
 </head>
@@ -127,8 +143,14 @@
 <nav class="top-nav">
   <div class="nav-inner">
     <div class="brand-group">
-      <div class="nav-logo-text">CORAL LIFE</div>
-      <div class="nav-tagline">INDOOR ENVIRONMENT REVOLUTION</div>
+      <img src="blob:https://outlook.office.com/bb15198a-ea31-40e6-beea-7cdadfc02ede" 
+           onerror="this.style.display='none'; document.getElementById('fallback-icon').style.display='block'" 
+           class="logo-img" alt="Coral Life Logo">
+      <div id="fallback-icon" style="display:none; font-size: 24px;">🏢</div>
+      <div class="brand-text-group">
+        <div class="nav-logo-text">CORAL LIFE</div>
+        <div class="nav-tagline">INDOOR ENVIRONMENT REVOLUTION</div>
+      </div>
     </div>
     <div class="tab-group">
       <button class="tab-btn active" id="btn-show-survey">แบบประเมิน</button>
@@ -175,7 +197,10 @@
         <div>
             <h2 style="font-size: 24px; color: var(--text-dark); font-weight: 700;">Performance Insights</h2>
         </div>
-        <button id="btn-export" style="background: var(--coral-main); color: #fff; border:none; padding:10px 20px; border-radius:12px; font-weight:700; cursor:pointer;">Export CSV</button>
+        <div style="display:flex; gap:10px;">
+            <button id="btn-export" class="btn-secondary">Export CSV</button>
+            <button id="btn-clear-trigger" class="btn-danger">ล้างข้อมูล</button>
+        </div>
     </div>
     
     <div class="grid-metrics">
@@ -191,6 +216,7 @@
   </div>
 </div>
 
+<!-- Modal เข้าสู่ระบบ -->
 <div id="modal-auth" class="overlay">
   <div class="login-box">
     <div style="font-size: 50px; margin-bottom: 20px;">🔒</div>
@@ -198,6 +224,17 @@
     <input type="password" id="pass-field" class="input-box" placeholder="Password" style="text-align:center; margin: 20px 0;">
     <button id="btn-login" class="btn-submit" style="margin-top:0;">Login</button>
     <button id="btn-close-auth" style="background:none; border:none; margin-top:15px; color:var(--text-medium); cursor:pointer;">ยกเลิก</button>
+  </div>
+</div>
+
+<!-- Modal ยืนยันการลบ -->
+<div id="modal-confirm" class="overlay">
+  <div class="login-box">
+    <div style="font-size: 50px; margin-bottom: 20px;">⚠️</div>
+    <h3>ยืนยันการล้างข้อมูล?</h3>
+    <p style="margin: 15px 0; color: var(--text-medium);">ข้อมูลการสำรวจทั้งหมดจะถูกลบออกจากฐานข้อมูลอย่างถาวรและไม่สามารถกู้คืนได้</p>
+    <button id="btn-confirm-delete" class="btn-submit" style="background:var(--danger); margin-top:10px;">ลบข้อมูลทั้งหมด</button>
+    <button id="btn-cancel-delete" style="background:none; border:none; margin-top:15px; color:var(--text-medium); cursor:pointer;">ยกเลิก</button>
   </div>
 </div>
 
@@ -213,14 +250,13 @@
   };
 
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, deleteDoc, doc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
   import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
   const auth = getAuth(app);
   
-  // ปรับโครงสร้าง Path ให้ตรงตามที่กำหนดใน Rules (Mandatory Rule 1)
   const appId = "erv-survey";
   const colRef = collection(db, "artifacts", appId, "public", "data", "surveys");
 
@@ -274,7 +310,6 @@
     stars.forEach((s, i) => s.classList.toggle('on', i < val));
   }
 
-  // Mandatory Rule 3: Auth ก่อนทำงานใดๆ
   const initAuth = async () => {
     try {
       await signInAnonymously(auth);
@@ -286,11 +321,8 @@
 
   onAuthStateChanged(auth, (user) => {
     currentUser = user;
-    if (user) {
-      console.log("Logged in with UID:", user.uid);
-      if (document.getElementById('panel-dash').classList.contains('active')) {
-          startDataStream();
-      }
+    if (user && document.getElementById('panel-dash').classList.contains('active')) {
+      startDataStream();
     }
   });
 
@@ -298,7 +330,6 @@
     if (!currentUser) return;
     if (unsubscribeStream) unsubscribeStream();
     
-    // Mandatory Rule 2: Simple query
     const q = query(colRef, orderBy('timestamp', 'desc'));
     
     unsubscribeStream = onSnapshot(q, (snap) => {
@@ -337,7 +368,16 @@
   function renderDash() {
     const count = records.length;
     document.getElementById('stat-count').textContent = count;
-    if (count === 0) return;
+    
+    if (count === 0) {
+      document.getElementById('avg-overall').textContent = '0.0';
+      document.getElementById('avg-prof').textContent = '0.0';
+      document.getElementById('avg-clean').textContent = '0.0';
+      document.getElementById('avg-punct').textContent = '0.0';
+      if (mainChart) mainChart.destroy();
+      document.getElementById('data-log').innerHTML = '<p style="text-align:center; padding:2rem; color:var(--text-medium);">ยังไม่มีข้อมูลการสำรวจ</p>';
+      return;
+    }
 
     const getAvg = (k) => (records.reduce((a, b) => a + (b[k] || 0), 0) / count).toFixed(1);
     document.getElementById('avg-overall').textContent = getAvg('overall');
@@ -379,6 +419,25 @@
     `).join('');
   }
 
+  // --- ระบบปุ่มล้างข้อมูล ---
+  const modalConfirm = document.getElementById('modal-confirm');
+  document.getElementById('btn-clear-trigger').onclick = () => modalConfirm.classList.add('active');
+  document.getElementById('btn-cancel-delete').onclick = () => modalConfirm.classList.remove('active');
+
+  document.getElementById('btn-confirm-delete').onclick = async () => {
+    if (!currentUser) return;
+    try {
+      modalConfirm.classList.remove('active');
+      const querySnapshot = await getDocs(colRef);
+      const deletePromises = querySnapshot.docs.map(d => deleteDoc(doc(db, "artifacts", appId, "public", "data", "surveys", d.id)));
+      await Promise.all(deletePromises);
+      alert("ล้างข้อมูลทั้งหมดสำเร็จ");
+    } catch (e) {
+      console.error("Delete Error:", e);
+      alert("เกิดข้อผิดพลาดในการลบข้อมูล");
+    }
+  };
+
   document.getElementById('btn-show-survey').onclick = () => switchTab('survey');
   document.getElementById('btn-show-dash').onclick = () => document.getElementById('modal-auth').classList.add('active');
   document.getElementById('btn-close-auth').onclick = () => document.getElementById('modal-auth').classList.remove('active');
@@ -406,9 +465,9 @@
     records.forEach(r => {
       csv.push(`"${r.customer}",${r.overall},${r.professional},${r.clean},${r.punctuality},"${(r.comment||'').replace(/"/g,'')}"`);
     });
-    const blob = new Blob([csv.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const blobCsv = new Blob([csv.join('\n')], { type: 'text/csv;charset=utf-8;' });
     const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
+    a.href = URL.createObjectURL(blobCsv);
     a.download = `Survey_Export.csv`;
     a.click();
   };
