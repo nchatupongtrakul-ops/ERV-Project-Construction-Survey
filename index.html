@@ -102,6 +102,7 @@
     box-shadow: 0 8px 25px rgba(244, 143, 177, 0.3);
   }
   .btn-submit:hover { background: #ec407a; transform: translateY(-2px); }
+  .btn-submit:disabled { background: #ccc; cursor: not-allowed; box-shadow: none; }
 
   .grid-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 30px; }
   .stat-card { background: var(--white); padding: 1.5rem; border-radius: 20px; box-shadow: var(--shadow-premium); text-align: center; border-bottom: 4px solid var(--pastel-blue); }
@@ -160,7 +161,7 @@
           <textarea id="input-comment" class="input-box" style="min-height: 120px;" placeholder="คุณอยากให้เราพัฒนาด้านไหนเป็นพิเศษหรือไม่..."></textarea>
         </div>
 
-        <button id="btn-submit-all" class="btn-submit">ส่งความคิดเห็น</button>
+        <button id="btn-submit-all" class="btn-submit">กำลังเตรียมระบบ...</button>
       </div>
     </div>
 
@@ -222,14 +223,14 @@
   const db = getFirestore(app);
   const auth = getAuth(app);
   
-  // ปรับ Path ให้ตรงตาม Rules ที่ตั้งไว้
+  // ปรับ Path ให้ตรงตาม Rules: /artifacts/erv-survey/public/data/surveys
   const colRef = collection(db, "artifacts", "erv-survey", "public", "data", "surveys");
 
   let surveyScores = { overall: 0, professional: 0, clean: 0, punctuality: 0 };
   let records = [];
   let mainChart = null;
   let unsubscribeStream = null;
-  let currentUser = null;
+  let isAuthReady = false;
 
   const scoreText = ['', 'ต้องปรับปรุงด่วน', 'ไม่พึงพอใจ', 'ควรปรับปรุง', 'พอใช้ได้', 'ดีตามเกณฑ์', 'ค่อนข้างดี', 'ดีมาก', 'ดีเยี่ยม', 'ประทับใจ', 'ดีที่สุด'];
   const questions = [
@@ -279,24 +280,52 @@
     stars.forEach((s, i) => s.classList.toggle('on', i < count));
   }
 
-  window.addEventListener('DOMContentLoaded', () => {
-    initSurveyUI();
-    onAuthStateChanged(auth, (user) => {
-      if (user) currentUser = user;
-      else signInAnonymously(auth).catch(console.error);
-    });
+  // ระบบตรวจสอบการ Login
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      console.log("Auth Ready:", user.uid);
+      isAuthReady = true;
+      const btn = document.getElementById('btn-submit-all');
+      btn.innerText = "ส่งความคิดเห็น";
+      btn.disabled = false;
+    } else {
+      signInAnonymously(auth).catch(err => {
+        console.error("Auth Error:", err);
+        alert("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณา Refresh หน้าจอ");
+      });
+    }
   });
 
+  window.addEventListener('DOMContentLoaded', initSurveyUI);
+
   document.getElementById('btn-submit-all').onclick = async () => {
-    if (!currentUser) return alert("กำลังเชื่อมต่อระบบ...");
+    if (!isAuthReady) return alert("ระบบยังไม่พร้อม กรุณารอสักครู่...");
+    
     const name = document.getElementById('input-cust').value.trim();
-    if (!name || Object.values(surveyScores).some(v => v === 0)) return alert("กรุณากรอกข้อมูลให้ครบถ้วน");
+    const comment = document.getElementById('input-comment').value.trim();
+    
+    if (!name) return alert("กรุณาระบุชื่อลูกค้าหรือโครงการ");
+    if (Object.values(surveyScores).some(v => v === 0)) return alert("กรุณาให้คะแนนให้ครบทุกข้อ");
+
+    const btn = document.getElementById('btn-submit-all');
+    btn.disabled = true;
+    btn.innerText = "กำลังบันทึก...";
 
     try {
-      await addDoc(colRef, { ...surveyScores, customer: name, comment: document.getElementById('input-comment').value, timestamp: serverTimestamp() });
+      await addDoc(colRef, {
+        ...surveyScores,
+        customer: name,
+        comment: comment,
+        timestamp: serverTimestamp()
+      });
       document.getElementById('form-ui').style.display = 'none';
       document.getElementById('thanks-ui').style.display = 'block';
-    } catch (e) { alert("Error: " + e.message); }
+    } catch (e) { 
+      btn.disabled = false;
+      btn.innerText = "ส่งความคิดเห็น";
+      console.error("Submit Error:", e);
+      alert("เกิดข้อผิดพลาด: " + e.message + "\nกรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต");
+    }
   };
 
   function startDataStream() {
@@ -304,36 +333,50 @@
     unsubscribeStream = onSnapshot(q, (snap) => {
       records = snap.docs.map(doc => doc.data());
       renderDash();
-    }, (err) => alert("Access Denied: ตรวจสอบ Rules ใน Firebase อีกครั้ง"));
+    }, (err) => {
+      console.error("Snapshot Error:", err);
+      alert("ไม่สามารถดึงข้อมูลได้: " + err.message);
+    });
   }
 
   function renderDash() {
     const count = records.length;
     document.getElementById('stat-count').textContent = count;
     const getAvg = (k) => count === 0 ? "0.0" : (records.reduce((a, b) => a + (Number(b[k]) || 0), 0) / count).toFixed(1);
-    ['overall', 'professional', 'clean', 'punctuality'].forEach(k => {
-      const el = document.getElementById(`avg-${k === 'professional' ? 'prof' : k === 'punctuality' ? 'punct' : k}`);
-      if(el) el.textContent = getAvg(k);
-    });
+    
+    document.getElementById('avg-overall').textContent = getAvg('overall');
+    document.getElementById('avg-prof').textContent = getAvg('professional');
+    document.getElementById('avg-clean').textContent = getAvg('clean');
+    document.getElementById('avg-punct').textContent = getAvg('punctuality');
 
     if (mainChart) mainChart.destroy();
     mainChart = new Chart(document.getElementById('chart-main'), {
       type: 'bar',
       data: {
         labels: ['การติดตั้ง', 'ทีมช่าง', 'ความสะอาด', 'ตรงเวลา'],
-        datasets: [{ data: [getAvg('overall'), getAvg('professional'), getAvg('clean'), getAvg('punctuality')], backgroundColor: ['#f48fb1', '#ce93d8', '#90caf9', '#ffcc80'], borderRadius: 12 }]
+        datasets: [{ 
+          data: [getAvg('overall'), getAvg('professional'), getAvg('clean'), getAvg('punctuality')], 
+          backgroundColor: ['#f48fb1', '#ce93d8', '#90caf9', '#ffcc80'], 
+          borderRadius: 12 
+        }]
       },
-      options: { indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { min: 0, max: 10 } } }
+      options: { 
+        indexAxis: 'y', 
+        plugins: { legend: { display: false } }, 
+        scales: { x: { min: 0, max: 10 } } 
+      }
     });
 
     document.getElementById('data-log').innerHTML = records.map(r => `
       <div class="log-card">
-        <strong>${r.customer}</strong>
+        <strong>${r.customer || 'ไม่ระบุชื่อ'}</strong>
         <div class="badge-container">
-          <span class="badge">ติดตั้ง: ${r.overall}</span> <span class="badge">ช่าง: ${r.professional}</span>
-          <span class="badge">สะอาด: ${r.clean}</span> <span class="badge">ตรงเวลา: ${r.punctuality}</span>
+          <span class="badge">ติดตั้ง: <b>${r.overall}</b></span> 
+          <span class="badge">ช่าง: <b>${r.professional}</b></span>
+          <span class="badge">สะอาด: <b>${r.clean}</b></span> 
+          <span class="badge">ตรงเวลา: <b>${r.punctuality}</b></span>
         </div>
-        ${r.comment ? `<p style="margin-top:8px; font-size:13px; color:#666;">"${r.comment}"</p>` : ''}
+        ${r.comment ? `<p style="margin-top:10px; font-size:13px; color:#666; font-style:italic;">"${r.comment}"</p>` : ''}
       </div>
     `).join('');
   }
@@ -341,12 +384,15 @@
   document.getElementById('btn-show-survey').onclick = () => switchTab('survey');
   document.getElementById('btn-show-dash').onclick = () => document.getElementById('modal-auth').classList.add('active');
   document.getElementById('btn-close-auth').onclick = () => document.getElementById('modal-auth').classList.remove('active');
+  
   document.getElementById('btn-login').onclick = () => {
     if (document.getElementById('pass-field').value === 'Coral789') {
       document.getElementById('modal-auth').classList.remove('active');
       switchTab('dash');
       startDataStream();
-    } else alert("รหัสผ่านไม่ถูกต้อง");
+    } else {
+      alert("รหัสผ่านไม่ถูกต้อง");
+    }
   };
 
   function switchTab(id) {
@@ -355,11 +401,14 @@
   }
 
   document.getElementById('btn-export').onclick = () => {
+    if (records.length === 0) return alert("ไม่มีข้อมูลสำหรับการ Export");
     const csv = ["\uFEFFCustomer,Overall,Professional,Clean,Punctuality,Comment"];
-    records.forEach(r => csv.push(`"${r.customer}",${r.overall},${r.professional},${r.clean},${r.punctuality},"${(r.comment||'').replace(/"/g, '""')}"`));
+    records.forEach(r => {
+      csv.push(`"${r.customer}",${r.overall},${r.professional},${r.clean},${r.punctuality},"${(r.comment||'').replace(/"/g, '""')}"`);
+    });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(new Blob([csv.join('\n')], { type: 'text/csv;charset=utf-8;' }));
-    link.download = `Survey_Export.csv`;
+    link.download = `CoralLife_Survey_Export.csv`;
     link.click();
   };
 </script>
