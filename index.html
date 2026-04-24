@@ -20,7 +20,6 @@
     --bg-light: #fafbfd;
     --radius-lg: 30px;
     --shadow-premium: 0 15px 45px rgba(244, 143, 177, 0.1);
-    --danger: #ff5252;
   }
   
   body { 
@@ -42,11 +41,8 @@
     max-width: 1000px; margin: 0 auto; padding: 0 1.5rem; 
     display: flex; align-items: center; justify-content: space-between; 
   }
-  .brand-group { display: flex; align-items: center; gap: 12px; }
-  .logo-img { height: 45px; width: auto; object-fit: contain; }
-  .brand-text-group { display: flex; flex-direction: column; line-height: 1.2; }
-  .nav-logo-text { font-weight: 800; color: var(--coral-main); font-size: 20px; letter-spacing: 0.5px; }
-  .nav-tagline { font-size: 9px; font-weight: 600; color: var(--text-medium); letter-spacing: 0.5px; margin-top: 1px; }
+  .brand-group { display: flex; align-items: center; }
+  .logo-img { height: 80px; width: auto; object-fit: contain; } /* ปรับขนาดโลโก้เป็น 80px */
 
   .tab-group { display: flex; gap: 4px; background: var(--pastel-blue); padding: 4px; border-radius: 14px; }
   .tab-btn { 
@@ -69,9 +65,9 @@
   }
   .header-banner { 
     background: linear-gradient(135deg, #fff 0%, var(--coral-soft) 100%); 
-    color: var(--text-dark); padding: 3rem 2rem; text-align: center;
+    color: var(--text-dark); padding: 4rem 2rem; text-align: center;
   }
-  .header-banner h1 { font-size: 28px; font-weight: 700; color: var(--coral-main); margin-bottom: 8px; }
+  .header-banner h1 { font-size: 32px; font-weight: 800; color: var(--coral-main); margin-bottom: 8px; }
 
   .form-body { padding: 3rem 2rem; max-width: 750px; margin: 0 auto; }
   .q-group { margin-bottom: 3.5rem; }
@@ -88,6 +84,7 @@
   .star { 
     font-size: 32px; cursor: pointer; filter: grayscale(1); opacity: 0.15; 
     transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+    user-select: none;
   }
   .star.on { filter: none; opacity: 1; transform: scale(1.1); }
   .rating-label { font-size: 15px; font-weight: 600; color: var(--coral-main); height: 24px; }
@@ -105,16 +102,6 @@
     box-shadow: 0 8px 25px rgba(244, 143, 177, 0.3);
   }
   .btn-submit:hover { background: #ec407a; transform: translateY(-2px); }
-  
-  .btn-secondary {
-    background: #f1f2f6; color: var(--text-dark); border: none; padding: 10px 20px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: 0.2s;
-  }
-  .btn-secondary:hover { background: #dfe4ea; }
-
-  .btn-danger {
-    background: var(--danger); color: white; border: none; padding: 10px 20px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: 0.2s;
-  }
-  .btn-danger:hover { opacity: 0.8; }
 
   .grid-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 30px; }
   .stat-card { background: var(--white); padding: 1.5rem; border-radius: 20px; box-shadow: var(--shadow-premium); text-align: center; border-bottom: 4px solid var(--pastel-blue); }
@@ -132,10 +119,11 @@
   .overlay.active { display: flex; }
   .login-box { background: white; padding: 3rem; border-radius: 35px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 25px 60px rgba(0,0,0,0.1); }
 
-  /* Modal สำหรับยืนยันการลบ */
-  #modal-confirm { z-index: 2000; }
-
-  @media (max-width: 600px) { .grid-metrics { grid-template-columns: 1fr 1fr; } .stat-card:first-child { grid-column: span 2; } }
+  @media (max-width: 600px) { 
+    .grid-metrics { grid-template-columns: 1fr 1fr; } 
+    .stat-card:first-child { grid-column: span 2; }
+    .logo-img { height: 60px; }
+  }
 </style>
 </head>
 <body>
@@ -143,14 +131,8 @@
 <nav class="top-nav">
   <div class="nav-inner">
     <div class="brand-group">
-      <img src="blob:https://outlook.office.com/bb15198a-ea31-40e6-beea-7cdadfc02ede" 
-           onerror="this.style.display='none'; document.getElementById('fallback-icon').style.display='block'" 
-           class="logo-img" alt="Coral Life Logo">
-      <div id="fallback-icon" style="display:none; font-size: 24px;">🏢</div>
-      <div class="brand-text-group">
-        <div class="nav-logo-text">CORAL LIFE</div>
-        <div class="nav-tagline">INDOOR ENVIRONMENT REVOLUTION</div>
-      </div>
+      <!-- โลโก้ขนาด 80px -->
+      <img src="https://lh3.googleusercontent.com/d/19Mojy_vGBQz69HHqRNgXTXUFe9VHmMuZ" alt="Coral Life Logo" class="logo-img" onerror="this.style.display='none'">
     </div>
     <div class="tab-group">
       <button class="tab-btn active" id="btn-show-survey">แบบประเมิน</button>
@@ -163,7 +145,8 @@
   <div class="content-wrap">
     <div class="survey-card" id="form-ui">
       <div class="header-banner">
-        <h1>ERV Service Feedback</h1>
+        <!-- แก้ไขหัวข้อเป็น ERV Installation Feedback -->
+        <h1>ERV Installation Feedback</h1>
         <p>ความพึงพอใจของคุณคือความภูมิใจของเรา</p>
       </div>
       <div class="form-body">
@@ -172,7 +155,7 @@
           <input type="text" id="input-cust" class="input-box" placeholder="ระบุชื่อเพื่อบันทึกข้อมูล">
         </div>
 
-        <div class="q-group" id="q-container"></div>
+        <div id="q-container"></div>
 
         <div class="q-group">
           <label class="q-title">ข้อแนะนำเพิ่มเติม</label>
@@ -186,6 +169,7 @@
     <div id="thanks-ui" style="display:none; text-align:center; padding:7rem 2rem;">
       <div style="font-size: 80px; margin-bottom: 20px;">💖</div>
       <h2 style="font-size: 32px; color: var(--coral-main);">บันทึกข้อมูลแล้ว</h2>
+      <p style="color: var(--text-medium); margin-bottom: 30px;">ขอบคุณที่ร่วมเป็นส่วนหนึ่งในการพัฒนาบริการของเรา</p>
       <button onclick="location.reload()" class="btn-submit" style="max-width: 250px;">กลับหน้าแรก</button>
     </div>
   </div>
@@ -197,10 +181,7 @@
         <div>
             <h2 style="font-size: 24px; color: var(--text-dark); font-weight: 700;">Performance Insights</h2>
         </div>
-        <div style="display:flex; gap:10px;">
-            <button id="btn-export" class="btn-secondary">Export CSV</button>
-            <button id="btn-clear-trigger" class="btn-danger">ล้างข้อมูล</button>
-        </div>
+        <button id="btn-export" style="background: var(--coral-main); color: #fff; border:none; padding:10px 20px; border-radius:12px; font-weight:700; cursor:pointer;">Export CSV</button>
     </div>
     
     <div class="grid-metrics">
@@ -216,48 +197,28 @@
   </div>
 </div>
 
-<!-- Modal เข้าสู่ระบบ -->
 <div id="modal-auth" class="overlay">
   <div class="login-box">
     <div style="font-size: 50px; margin-bottom: 20px;">🔒</div>
     <h3>Admin Access</h3>
+    <p style="font-size: 13px; color: var(--text-medium); margin-top: 5px;">กรุณากรอกรหัสผ่านเพื่อเข้าชม Dashboard</p>
     <input type="password" id="pass-field" class="input-box" placeholder="Password" style="text-align:center; margin: 20px 0;">
     <button id="btn-login" class="btn-submit" style="margin-top:0;">Login</button>
     <button id="btn-close-auth" style="background:none; border:none; margin-top:15px; color:var(--text-medium); cursor:pointer;">ยกเลิก</button>
   </div>
 </div>
 
-<!-- Modal ยืนยันการลบ -->
-<div id="modal-confirm" class="overlay">
-  <div class="login-box">
-    <div style="font-size: 50px; margin-bottom: 20px;">⚠️</div>
-    <h3>ยืนยันการล้างข้อมูล?</h3>
-    <p style="margin: 15px 0; color: var(--text-medium);">ข้อมูลการสำรวจทั้งหมดจะถูกลบออกจากฐานข้อมูลอย่างถาวรและไม่สามารถกู้คืนได้</p>
-    <button id="btn-confirm-delete" class="btn-submit" style="background:var(--danger); margin-top:10px;">ลบข้อมูลทั้งหมด</button>
-    <button id="btn-cancel-delete" style="background:none; border:none; margin-top:15px; color:var(--text-medium); cursor:pointer;">ยกเลิก</button>
-  </div>
-</div>
-
 <script type="module">
-  const firebaseConfig = {
-    apiKey: "AIzaSyCrP6AIvPcs8ORHBdYJYfkbZJsGn-1Hkqg",
-    authDomain: "erv-survey.firebaseapp.com",
-    projectId: "erv-survey",
-    storageBucket: "erv-survey.firebasestorage.app",
-    messagingSenderId: "367636638742",
-    appId: "1:367636638742:web:2a9279b6f528204c099937",
-    measurementId: "G-XRSZX7W47Y"
-  };
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+  import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+  import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, deleteDoc, doc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-  import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
+  const firebaseConfig = JSON.parse(__firebase_config);
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
   const auth = getAuth(app);
+  const appId = typeof __app_id !== 'undefined' ? __app_id : 'erv-survey';
   
-  const appId = "erv-survey";
   const colRef = collection(db, "artifacts", appId, "public", "data", "surveys");
 
   let surveyScores = { overall: 0, professional: 0, clean: 0, punctuality: 0 };
@@ -296,25 +257,30 @@
     const label = document.getElementById(`label-${key}`);
     
     stars.forEach((s, idx) => {
-      s.onmouseover = () => updateUI(stars, idx + 1);
-      s.onmouseleave = () => updateUI(stars, surveyScores[key]);
+      const val = idx + 1;
+      s.onmouseover = () => highlightStars(stars, val);
+      s.onmouseleave = () => highlightStars(stars, surveyScores[key]);
       s.onclick = () => {
-        surveyScores[key] = idx + 1;
-        label.textContent = `${surveyScores[key]}/10 — ${scoreText[surveyScores[key]]}`;
-        updateUI(stars, surveyScores[key]);
+        surveyScores[key] = val;
+        label.textContent = `${val}/10 — ${scoreText[val]}`;
+        highlightStars(stars, val);
       };
     });
   });
 
-  function updateUI(stars, val) {
-    stars.forEach((s, i) => s.classList.toggle('on', i < val));
+  function highlightStars(stars, count) {
+    stars.forEach((s, i) => s.classList.toggle('on', i < count));
   }
 
   const initAuth = async () => {
     try {
-      await signInAnonymously(auth);
+      if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+        await signInWithCustomToken(auth, __initial_auth_token);
+      } else {
+        await signInAnonymously(auth);
+      }
     } catch (err) {
-      console.error("Auth Fail:", err);
+      console.error("Auth Error:", err);
     }
   };
   initAuth();
@@ -329,26 +295,18 @@
   function startDataStream() {
     if (!currentUser) return;
     if (unsubscribeStream) unsubscribeStream();
-    
     const q = query(colRef, orderBy('timestamp', 'desc'));
-    
     unsubscribeStream = onSnapshot(q, (snap) => {
       records = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       renderDash();
-    }, (error) => {
-      console.error("Firestore Error:", error.code, error.message);
-    });
+    }, (err) => console.error("Data Stream Error:", err));
   }
 
   document.getElementById('btn-submit-all').onclick = async () => {
     const name = document.getElementById('input-cust').value.trim();
-    if (!name) return alert("กรุณาระบุชื่อลูกค้า");
-    if (Object.values(surveyScores).some(v => v === 0)) return alert("กรุณาให้คะแนนครบทุกข้อ");
-
-    if (!currentUser) {
-        alert("กำลังเชื่อมต่อระบบความปลอดภัย...");
-        return;
-    }
+    if (!name) { alert("กรุณาระบุชื่อลูกค้าหรือโครงการ"); return; }
+    if (Object.values(surveyScores).some(v => v === 0)) { alert("กรุณาให้คะแนนความพึงพอใจให้ครบทุกหัวข้อ"); return; }
+    if (!currentUser) { alert("ระบบกำลังเชื่อมต่อฐานข้อมูล..."); return; }
 
     try {
       await addDoc(colRef, { 
@@ -359,27 +317,14 @@
       });
       document.getElementById('form-ui').style.display = 'none';
       document.getElementById('thanks-ui').style.display = 'block';
-    } catch (e) { 
-      console.error("Submit Error:", e);
-      alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล"); 
-    }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (e) { alert("เกิดข้อผิดพลาด: " + e.message); }
   };
 
   function renderDash() {
     const count = records.length;
     document.getElementById('stat-count').textContent = count;
-    
-    if (count === 0) {
-      document.getElementById('avg-overall').textContent = '0.0';
-      document.getElementById('avg-prof').textContent = '0.0';
-      document.getElementById('avg-clean').textContent = '0.0';
-      document.getElementById('avg-punct').textContent = '0.0';
-      if (mainChart) mainChart.destroy();
-      document.getElementById('data-log').innerHTML = '<p style="text-align:center; padding:2rem; color:var(--text-medium);">ยังไม่มีข้อมูลการสำรวจ</p>';
-      return;
-    }
-
-    const getAvg = (k) => (records.reduce((a, b) => a + (b[k] || 0), 0) / count).toFixed(1);
+    const getAvg = (k) => count === 0 ? "0.0" : (records.reduce((a, b) => a + (b[k] || 0), 0) / count).toFixed(1);
     document.getElementById('avg-overall').textContent = getAvg('overall');
     document.getElementById('avg-prof').textContent = getAvg('professional');
     document.getElementById('avg-clean').textContent = getAvg('clean');
@@ -391,22 +336,24 @@
       data: {
         labels: ['การติดตั้ง', 'ทีมช่าง', 'ความสะอาด', 'ตรงเวลา'],
         datasets: [{ 
+          label: 'Average Score',
           data: [getAvg('overall'), getAvg('professional'), getAvg('clean'), getAvg('punctuality')], 
           backgroundColor: ['#f48fb1', '#ce93d8', '#90caf9', '#ffcc80'], 
-          borderRadius: 10 
+          borderRadius: 12
         }]
       },
       options: { 
-        indexAxis: 'y', 
+        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
         plugins: { legend: { display: false } },
-        scales: { x: { min: 0, max: 10 } }
+        scales: { x: { min: 0, max: 10, grid: { display: false } }, y: { grid: { display: false } } }
       }
     });
 
     document.getElementById('data-log').innerHTML = records.map(r => `
       <div class="log-card">
         <div style="display:flex; justify-content:space-between; align-items:center;">
-          <strong>${r.customer}</strong>
+          <strong style="font-size:16px;">${r.customer}</strong>
+          <span style="font-size:11px; color:var(--text-medium)">${r.timestamp ? new Date(r.timestamp.seconds * 1000).toLocaleDateString('th-TH') : 'Just now'}</span>
         </div>
         <div class="badge-container">
           <div class="badge">ติดตั้ง: <b>${r.overall}</b></div>
@@ -414,29 +361,10 @@
           <div class="badge">สะอาด: <b>${r.clean}</b></div>
           <div class="badge">ตรงเวลา: <b>${r.punctuality}</b></div>
         </div>
-        ${r.comment ? `<div style="margin-top:8px; font-size:13px; color:#607d8b; font-style:italic;">"${r.comment}"</div>` : ''}
+        ${r.comment ? `<div style="margin-top:12px; padding:10px; background:#f8fafc; border-radius:10px; font-size:13px; color:#546e7a; line-height:1.4;">"${r.comment}"</div>` : ''}
       </div>
     `).join('');
   }
-
-  // --- ระบบปุ่มล้างข้อมูล ---
-  const modalConfirm = document.getElementById('modal-confirm');
-  document.getElementById('btn-clear-trigger').onclick = () => modalConfirm.classList.add('active');
-  document.getElementById('btn-cancel-delete').onclick = () => modalConfirm.classList.remove('active');
-
-  document.getElementById('btn-confirm-delete').onclick = async () => {
-    if (!currentUser) return;
-    try {
-      modalConfirm.classList.remove('active');
-      const querySnapshot = await getDocs(colRef);
-      const deletePromises = querySnapshot.docs.map(d => deleteDoc(doc(db, "artifacts", appId, "public", "data", "surveys", d.id)));
-      await Promise.all(deletePromises);
-      alert("ล้างข้อมูลทั้งหมดสำเร็จ");
-    } catch (e) {
-      console.error("Delete Error:", e);
-      alert("เกิดข้อผิดพลาดในการลบข้อมูล");
-    }
-  };
 
   document.getElementById('btn-show-survey').onclick = () => switchTab('survey');
   document.getElementById('btn-show-dash').onclick = () => document.getElementById('modal-auth').classList.add('active');
@@ -461,15 +389,19 @@
 
   document.getElementById('btn-export').onclick = () => {
     if (records.length === 0) return;
-    const csv = ["\uFEFFCustomer,Overall,Professional,Clean,Punctuality,Comment"];
+    const csv = ["\uFEFFCustomer,Overall,Professional,Clean,Punctuality,Comment,Date"];
     records.forEach(r => {
-      csv.push(`"${r.customer}",${r.overall},${r.professional},${r.clean},${r.punctuality},"${(r.comment||'').replace(/"/g,'')}"`);
+      const dateStr = r.timestamp ? new Date(r.timestamp.seconds * 1000).toISOString() : '';
+      csv.push(`"${r.customer}",${r.overall},${r.professional},${r.clean},${r.punctuality},"${(r.comment||'').replace(/"/g,'')}",${dateStr}`);
     });
-    const blobCsv = new Blob([csv.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob([csv.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = URL.createObjectURL(blobCsv);
-    a.download = `Survey_Export.csv`;
+    a.href = url;
+    a.download = `CoralLife_Survey_Export_${new Date().toLocaleDateString()}.csv`;
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
   };
 </script>
 </body>
