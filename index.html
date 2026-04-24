@@ -42,7 +42,7 @@
     display: flex; align-items: center; justify-content: space-between; 
   }
   .brand-group { display: flex; align-items: center; }
-  .logo-img { height: 80px; width: auto; object-fit: contain; } /* ปรับขนาดโลโก้เป็น 80px */
+  .logo-img { height: 80px; width: auto; object-fit: contain; }
 
   .tab-group { display: flex; gap: 4px; background: var(--pastel-blue); padding: 4px; border-radius: 14px; }
   .tab-btn { 
@@ -131,8 +131,7 @@
 <nav class="top-nav">
   <div class="nav-inner">
     <div class="brand-group">
-      <!-- โลโก้ขนาด 80px -->
-      <img src="https://lh3.googleusercontent.com/d/19Mojy_vGBQz69HHqRNgXTXUFe9VHmMuZ" alt="Coral Life Logo" class="logo-img" onerror="this.style.display='none'">
+      <img src="https://lh3.googleusercontent.com/d/19Mojy_vGBQz69HHqRNgXTXUFe9VHmMuZ" alt="Coral Life Logo" class="logo-img">
     </div>
     <div class="tab-group">
       <button class="tab-btn active" id="btn-show-survey">แบบประเมิน</button>
@@ -145,7 +144,6 @@
   <div class="content-wrap">
     <div class="survey-card" id="form-ui">
       <div class="header-banner">
-        <!-- แก้ไขหัวข้อเป็น ERV Installation Feedback -->
         <h1>ERV Installation Feedback</h1>
         <p>ความพึงพอใจของคุณคือความภูมิใจของเรา</p>
       </div>
@@ -178,9 +176,7 @@
 <div id="panel-dash" class="panel">
   <div class="content-wrap">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; flex-wrap:wrap; gap:15px;">
-        <div>
-            <h2 style="font-size: 24px; color: var(--text-dark); font-weight: 700;">Performance Insights</h2>
-        </div>
+        <h2 style="font-size: 24px; color: var(--text-dark); font-weight: 700;">Performance Insights</h2>
         <button id="btn-export" style="background: var(--coral-main); color: #fff; border:none; padding:10px 20px; border-radius:12px; font-weight:700; cursor:pointer;">Export CSV</button>
     </div>
     
@@ -201,7 +197,6 @@
   <div class="login-box">
     <div style="font-size: 50px; margin-bottom: 20px;">🔒</div>
     <h3>Admin Access</h3>
-    <p style="font-size: 13px; color: var(--text-medium); margin-top: 5px;">กรุณากรอกรหัสผ่านเพื่อเข้าชม Dashboard</p>
     <input type="password" id="pass-field" class="input-box" placeholder="Password" style="text-align:center; margin: 20px 0;">
     <button id="btn-login" class="btn-submit" style="margin-top:0;">Login</button>
     <button id="btn-close-auth" style="background:none; border:none; margin-top:15px; color:var(--text-medium); cursor:pointer;">ยกเลิก</button>
@@ -213,11 +208,21 @@
   import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
   import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
-  const firebaseConfig = JSON.parse(__firebase_config);
+  // ใช้ค่า Config ที่คุณระบุมาโดยตรง
+  const firebaseConfig = {
+    apiKey: "AIzaSyCrP6AIvPcs8ORHBdYJYfkbZJsGn-1Hkqg",
+    authDomain: "erv-survey.firebaseapp.com",
+    projectId: "erv-survey",
+    storageBucket: "erv-survey.firebasestorage.app",
+    messagingSenderId: "367636638742",
+    appId: "1:367636638742:web:2a9279b6f528204c099937",
+    measurementId: "G-XRSZX7W47Y"
+  };
+
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
   const auth = getAuth(app);
-  const appId = typeof __app_id !== 'undefined' ? __app_id : 'erv-survey';
+  const appId = "coral-life-erv-survey"; // ID สำหรับแยกข้อมูลใน Firestore
   
   const colRef = collection(db, "artifacts", appId, "public", "data", "surveys");
 
@@ -225,7 +230,6 @@
   let records = [];
   let mainChart = null;
   let unsubscribeStream = null;
-  let currentUser = null;
 
   const scoreText = ['', 'ต้องปรับปรุงด่วน', 'ไม่พึงพอใจ', 'ควรปรับปรุง', 'พอใช้ได้', 'ดีตามเกณฑ์', 'ค่อนข้างดี', 'ดีมาก', 'ดีเยี่ยม', 'ประทับใจ', 'ดีที่สุด'];
   const questions = [
@@ -235,6 +239,7 @@
     { key: 'punctuality', label: 'ความตรงต่อเวลานัดหมาย', id: '04' }
   ];
 
+  // วาดคำถามทันที
   const qContainer = document.getElementById('q-container');
   questions.forEach(q => {
     const html = `
@@ -272,41 +277,27 @@
     stars.forEach((s, i) => s.classList.toggle('on', i < count));
   }
 
+  // ล็อกอินอัตโนมัติ
   const initAuth = async () => {
     try {
-      if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-        await signInWithCustomToken(auth, __initial_auth_token);
-      } else {
-        await signInAnonymously(auth);
-      }
-    } catch (err) {
-      console.error("Auth Error:", err);
-    }
+      await signInAnonymously(auth);
+    } catch (err) { console.error("Auth Fail:", err); }
   };
   initAuth();
 
-  onAuthStateChanged(auth, (user) => {
-    currentUser = user;
-    if (user && document.getElementById('panel-dash').classList.contains('active')) {
-      startDataStream();
-    }
-  });
-
   function startDataStream() {
-    if (!currentUser) return;
     if (unsubscribeStream) unsubscribeStream();
     const q = query(colRef, orderBy('timestamp', 'desc'));
     unsubscribeStream = onSnapshot(q, (snap) => {
       records = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       renderDash();
-    }, (err) => console.error("Data Stream Error:", err));
+    }, (err) => console.log("Database Syncing..."));
   }
 
   document.getElementById('btn-submit-all').onclick = async () => {
     const name = document.getElementById('input-cust').value.trim();
     if (!name) { alert("กรุณาระบุชื่อลูกค้าหรือโครงการ"); return; }
     if (Object.values(surveyScores).some(v => v === 0)) { alert("กรุณาให้คะแนนความพึงพอใจให้ครบทุกหัวข้อ"); return; }
-    if (!currentUser) { alert("ระบบกำลังเชื่อมต่อฐานข้อมูล..."); return; }
 
     try {
       await addDoc(colRef, { 
@@ -318,13 +309,14 @@
       document.getElementById('form-ui').style.display = 'none';
       document.getElementById('thanks-ui').style.display = 'block';
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch (e) { alert("เกิดข้อผิดพลาด: " + e.message); }
+    } catch (e) { alert("Error: " + e.message); }
   };
 
   function renderDash() {
     const count = records.length;
     document.getElementById('stat-count').textContent = count;
     const getAvg = (k) => count === 0 ? "0.0" : (records.reduce((a, b) => a + (b[k] || 0), 0) / count).toFixed(1);
+    
     document.getElementById('avg-overall').textContent = getAvg('overall');
     document.getElementById('avg-prof').textContent = getAvg('professional');
     document.getElementById('avg-clean').textContent = getAvg('clean');
@@ -336,32 +328,27 @@
       data: {
         labels: ['การติดตั้ง', 'ทีมช่าง', 'ความสะอาด', 'ตรงเวลา'],
         datasets: [{ 
-          label: 'Average Score',
           data: [getAvg('overall'), getAvg('professional'), getAvg('clean'), getAvg('punctuality')], 
           backgroundColor: ['#f48fb1', '#ce93d8', '#90caf9', '#ffcc80'], 
           borderRadius: 12
         }]
       },
-      options: { 
-        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: { x: { min: 0, max: 10, grid: { display: false } }, y: { grid: { display: false } } }
-      }
+      options: { indexAxis: 'y', plugins: { legend: { display: false } } }
     });
 
     document.getElementById('data-log').innerHTML = records.map(r => `
       <div class="log-card">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <strong style="font-size:16px;">${r.customer}</strong>
-          <span style="font-size:11px; color:var(--text-medium)">${r.timestamp ? new Date(r.timestamp.seconds * 1000).toLocaleDateString('th-TH') : 'Just now'}</span>
+        <div style="display:flex; justify-content:space-between;">
+          <strong>${r.customer}</strong>
+          <small>${r.timestamp ? new Date(r.timestamp.seconds * 1000).toLocaleDateString('th-TH') : 'Just now'}</small>
         </div>
         <div class="badge-container">
-          <div class="badge">ติดตั้ง: <b>${r.overall}</b></div>
-          <div class="badge">ช่าง: <b>${r.professional}</b></div>
-          <div class="badge">สะอาด: <b>${r.clean}</b></div>
-          <div class="badge">ตรงเวลา: <b>${r.punctuality}</b></div>
+          <span class="badge">ติดตั้ง: ${r.overall}</span>
+          <span class="badge">ช่าง: ${r.professional}</span>
+          <span class="badge">สะอาด: ${r.clean}</span>
+          <span class="badge">ตรงเวลา: ${r.punctuality}</span>
         </div>
-        ${r.comment ? `<div style="margin-top:12px; padding:10px; background:#f8fafc; border-radius:10px; font-size:13px; color:#546e7a; line-height:1.4;">"${r.comment}"</div>` : ''}
+        ${r.comment ? `<p style="margin-top:10px; font-size:13px; color:#666;">"${r.comment}"</p>` : ''}
       </div>
     `).join('');
   }
@@ -381,27 +368,15 @@
   function switchTab(id) {
     document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === `panel-${id}`));
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.id === `btn-show-${id}`));
-    if (id !== 'dash' && unsubscribeStream) {
-        unsubscribeStream();
-        unsubscribeStream = null;
-    }
   }
 
   document.getElementById('btn-export').onclick = () => {
-    if (records.length === 0) return;
-    const csv = ["\uFEFFCustomer,Overall,Professional,Clean,Punctuality,Comment,Date"];
-    records.forEach(r => {
-      const dateStr = r.timestamp ? new Date(r.timestamp.seconds * 1000).toISOString() : '';
-      csv.push(`"${r.customer}",${r.overall},${r.professional},${r.clean},${r.punctuality},"${(r.comment||'').replace(/"/g,'')}",${dateStr}`);
-    });
-    const blob = new Blob([csv.join('\n')], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `CoralLife_Survey_Export_${new Date().toLocaleDateString()}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    const csv = ["\uFEFFCustomer,Overall,Professional,Clean,Punctuality,Comment"];
+    records.forEach(r => csv.push(`"${r.customer}",${r.overall},${r.professional},${r.clean},${r.punctuality},"${(r.comment||'')}"`));
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(new Blob([csv.join('\n')], { type: 'text/csv' }));
+    link.download = `Survey_Export_${new Date().toLocaleDateString()}.csv`;
+    link.click();
   };
 </script>
 </body>
