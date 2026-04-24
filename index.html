@@ -219,7 +219,10 @@
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
   const auth = getAuth(app);
-  const colRef = collection(db, "surveys");
+  
+  // ปรับโครงสร้าง Path ให้ตรงตามที่กำหนดใน Rules (Mandatory Rule 1)
+  const appId = "erv-survey";
+  const colRef = collection(db, "artifacts", appId, "public", "data", "surveys");
 
   let surveyScores = { overall: 0, professional: 0, clean: 0, punctuality: 0 };
   let records = [];
@@ -271,39 +274,38 @@
     stars.forEach((s, i) => s.classList.toggle('on', i < val));
   }
 
-  // แก้ไขปัญหา Auth: ยืนยันตัวตนก่อนทำงานใดๆ
+  // Mandatory Rule 3: Auth ก่อนทำงานใดๆ
+  const initAuth = async () => {
+    try {
+      await signInAnonymously(auth);
+    } catch (err) {
+      console.error("Auth Fail:", err);
+    }
+  };
+  initAuth();
+
   onAuthStateChanged(auth, (user) => {
     currentUser = user;
     if (user) {
-      console.log("Logged in:", user.uid);
-      // หากอยู่ในหน้า Dashboard อยู่แล้วให้เริ่ม Stream
+      console.log("Logged in with UID:", user.uid);
       if (document.getElementById('panel-dash').classList.contains('active')) {
           startDataStream();
       }
-    } else {
-      signInAnonymously(auth).catch(err => {
-        console.error("Auth Fail:", err);
-      });
     }
   });
 
   function startDataStream() {
-    if (!currentUser) {
-        console.warn("No user auth, waiting...");
-        return;
-    }
+    if (!currentUser) return;
     if (unsubscribeStream) unsubscribeStream();
     
+    // Mandatory Rule 2: Simple query
     const q = query(colRef, orderBy('timestamp', 'desc'));
-    // เพิ่ม error handler ที่ละเอียดขึ้น
+    
     unsubscribeStream = onSnapshot(q, (snap) => {
       records = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       renderDash();
     }, (error) => {
-      console.error("Streaming Error Details:", error.code, error.message);
-      if (error.code === 'permission-denied') {
-          console.error("FIX REQUIRED: Go to Firebase Console > Firestore > Rules and set to 'allow read, write: if true;'");
-      }
+      console.error("Firestore Error:", error.code, error.message);
     });
   }
 
@@ -312,9 +314,8 @@
     if (!name) return alert("กรุณาระบุชื่อลูกค้า");
     if (Object.values(surveyScores).some(v => v === 0)) return alert("กรุณาให้คะแนนครบทุกข้อ");
 
-    // ตรวจสอบว่าล็อกอินหรือยังก่อนส่ง
     if (!currentUser) {
-        alert("ระบบกำลังเชื่อมต่อความปลอดภัย กรุณารอสักครู่แล้วกดส่งอีกครั้ง");
+        alert("กำลังเชื่อมต่อระบบความปลอดภัย...");
         return;
     }
 
@@ -328,8 +329,8 @@
       document.getElementById('form-ui').style.display = 'none';
       document.getElementById('thanks-ui').style.display = 'block';
     } catch (e) { 
-      console.error("Submit Error Details:", e);
-      alert("ไม่สามารถบันทึกข้อมูลได้: " + e.message + "\n\nกรุณาตรวจสอบว่าได้ตั้งค่า Firestore Rules เป็น 'if true' แล้วหรือยัง"); 
+      console.error("Submit Error:", e);
+      alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล"); 
     }
   };
 
