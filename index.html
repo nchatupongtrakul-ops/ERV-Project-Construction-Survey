@@ -1,1 +1,386 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>แบบสำรวจความพึงพอใจ — ติดตั้งระบบ ERV</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --blue: #1a6fc4; --blue-light: #e8f2fb;
+    --green: #1a8a5a; --green-light: #e6f7ef;
+    --red: #c0392b; --red-light: #fdecea;
+    --amber: #d97706; --amber-light: #fef3c7;
+    --gray-200: #e9ecef; --gray-300: #dee2e6;
+    --gray-500: #868e96; --gray-700: #495057;
+    --text: #1a1a2e; --text-muted: #6c757d;
+    --radius: 12px; --radius-sm: 8px;
+    --shadow: 0 2px 16px rgba(0,0,0,0.08);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+  }
+  body { font-family: 'Sarabun', sans-serif; background: linear-gradient(135deg,#f0f6ff,#e8f4f8 50%,#f0fff4); min-height: 100vh; color: var(--text); padding-bottom: 40px; }
 
+  .top-nav { background: white; border-bottom: 1px solid var(--gray-200); position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .nav-inner { max-width: 960px; margin: 0 auto; padding: 0 1rem; display: flex; align-items: center; justify-content: space-between; }
+  .nav-logo { font-size: 16px; font-weight: 600; color: var(--blue); padding: 14px 0; }
+  .tab-btn { padding: 16px 18px; font-size: 14px; border: none; background: none; color: var(--text-muted); cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; font-family: 'Sarabun'; }
+  .tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); font-weight: 600; }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .content-wrap { max-width: 960px; margin: 0 auto; padding: 2rem 1rem; }
+
+  .survey-wrap { max-width: 620px; margin: 0 auto; }
+  .survey-card { background: white; border-radius: var(--radius); box-shadow: var(--shadow-lg); overflow: hidden; }
+  .survey-header { background: linear-gradient(135deg, var(--blue), #2d8ae8); color: white; padding: 2rem; text-align: center; }
+  .survey-header h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+  .survey-body { padding: 1.75rem 2rem; }
+  .q-block { margin-bottom: 1.75rem; }
+  .q-label { display: block; font-size: 15px; font-weight: 600; margin-bottom: 10px; }
+  .q-num { color: var(--blue); margin-right: 6px; }
+
+  .star-row { display: flex; gap: 8px; }
+  .star { font-size: 32px; cursor: pointer; transition: transform 0.12s; filter: grayscale(1); opacity: 0.3; user-select: none; }
+  .star.on { filter: none; opacity: 1; transform: scale(1.15); }
+  .star-hint { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+
+  .chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { padding: 8px 16px; border: 1.5px solid var(--gray-300); border-radius: 999px; font-size: 14px; background: white; cursor: pointer; font-family: 'Sarabun'; transition: all 0.15s; }
+  .chip.sel { border-color: var(--blue); background: var(--blue-light); color: var(--blue); font-weight: 600; }
+  .chip.sel-no { border-color: var(--red); background: var(--red-light); color: var(--red); font-weight: 600; }
+
+  .input-field { width: 100%; border: 1.5px solid var(--gray-300); border-radius: var(--radius-sm); padding: 10px 14px; font-family: 'Sarabun'; }
+  textarea.input-field { min-height: 90px; }
+
+  .submit-btn { width: 100%; padding: 14px; background: var(--blue); color: white; border: none; border-radius: var(--radius-sm); font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 1.25rem; font-family: 'Sarabun'; }
+  .submit-btn:disabled { background: var(--gray-300); cursor: not-allowed; }
+
+  /* Dashboard Styles */
+  .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 1.5rem; }
+  .metric { background: white; border-radius: var(--radius); padding: 1.25rem; box-shadow: var(--shadow); text-align: center; }
+  .mval { font-size: 28px; font-weight: 700; color: var(--blue); }
+  .resp-card { background: white; border-radius: var(--radius); padding: 1.25rem; border-left: 4px solid var(--gray-300); margin-bottom: 1rem; box-shadow: var(--shadow); }
+  .resp-card.hi { border-left-color: var(--green); }
+
+  /* Status Bar */
+  .status-bar-fixed { position: fixed; bottom: 0; left: 0; right: 0; background: #333; color: white; font-size: 11px; padding: 4px 12px; display: flex; justify-content: space-between; z-index: 9999; }
+  .dot { height: 8px; width: 8px; border-radius: 50%; display: inline-block; margin-right: 5px; background: #999; }
+  .dot.online { background: #4caf50; }
+
+  /* Modal */
+  .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center; }
+  .modal.active { display: flex; }
+  .modal-box { background: white; padding: 2rem; border-radius: 20px; width: 300px; text-align: center; }
+</style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <div class="nav-inner">
+    <div class="nav-logo">💨 ERV Service System</div>
+    <div>
+      <button class="tab-btn active" id="btn-survey">หน้าประเมิน</button>
+      <button class="tab-btn" id="btn-dash">รีวิวคำตอบ (Admin)</button>
+    </div>
+  </div>
+</nav>
+
+<!-- Tab 1: Survey -->
+<div id="tab-survey" class="panel active">
+  <div class="content-wrap">
+    <div class="survey-wrap" id="surveyUI">
+      <div class="survey-card">
+        <div class="survey-header">
+          <div style="font-size:40px; margin-bottom:10px;">💨</div>
+          <h1>แบบสอบถามความพึงพอใจ<br>การติดตั้งระบบ ERV</h1>
+          <p>ความคิดเห็นของคุณสำคัญต่อเรา</p>
+        </div>
+        <div class="survey-body">
+          <div class="q-block">
+            <span class="q-label">ชื่อลูกค้า / โครงการ</span>
+            <input type="text" id="custName" class="input-field" placeholder="ระบุชื่อของคุณ">
+          </div>
+
+          <div class="q-block">
+            <span class="q-label"><span class="q-num">1.</span> ความพึงพอใจโดยรวม</span>
+            <div class="star-row" id="star-row">
+              <div class="star" data-v="1">⭐</div>
+              <div class="star" data-v="2">⭐</div>
+              <div class="star" data-v="3">⭐</div>
+              <div class="star" data-v="4">⭐</div>
+              <div class="star" data-v="5">⭐</div>
+            </div>
+            <div class="star-hint" id="starHint">แตะดาวเพื่อให้คะแนน</div>
+          </div>
+
+          <div class="q-block">
+            <span class="q-label"><span class="q-num">2.</span> ความเป็นมืออาชีพของทีมงาน</span>
+            <div class="chip-row" id="q2-row">
+              <button class="chip" data-v="มืออาชีพมาก">มืออาชีพมาก</button>
+              <button class="chip" data-v="ค่อนข้างดี">ค่อนข้างดี</button>
+              <button class="chip" data-v="ปานกลาง">ปานกลาง</button>
+              <button class="chip" data-v="ควรปรับปรุง" data-cls="sel-no">ควรปรับปรุง</button>
+            </div>
+          </div>
+
+          <div class="q-block">
+            <span class="q-label"><span class="q-num">3.</span> งานติดตั้งเสร็จตรงเวลาหรือไม่?</span>
+            <div class="chip-row" id="q3-row">
+              <button class="chip" data-v="ตรงเวลา">ตรงเวลา</button>
+              <button class="chip" data-v="ล่าช้าเล็กน้อย">ล่าช้าเล็กน้อย</button>
+              <button class="chip" data-v="ล่าช้ามาก" data-cls="sel-no">ล่าช้ามาก</button>
+            </div>
+          </div>
+
+          <div class="q-block">
+            <span class="q-label"><span class="q-num">4.</span> ความคิดเห็นเพิ่มเติม</span>
+            <textarea id="comment" class="input-field" placeholder="กรุณาแชร์ข้อแนะนำของคุณ..."></textarea>
+          </div>
+
+          <button id="sendBtn" class="submit-btn" disabled>กำลังเตรียมระบบ...</button>
+        </div>
+      </div>
+    </div>
+    <div id="thanksUI" style="display:none; text-align:center; padding:4rem 2rem;">
+      <div style="font-size:60px;">🎉</div>
+      <h2>ขอบคุณสำหรับความคิดเห็น!</h2>
+      <p style="color:var(--text-muted); margin:15px 0 25px;">เราได้รับข้อมูลของคุณเรียบร้อยแล้ว</p>
+      <button onclick="location.reload()" class="submit-btn" style="max-width:200px;">ทำรายการใหม่</button>
+    </div>
+  </div>
+</div>
+
+<!-- Tab 2: Dashboard -->
+<div id="tab-dash" class="panel">
+  <div class="content-wrap">
+    <div class="metrics">
+      <div class="metric"><div>ทั้งหมด</div><div class="mval" id="m-count">0</div></div>
+      <div class="metric"><div>คะแนนเฉลี่ย</div><div class="mval" id="m-avg">0.0</div></div>
+      <div class="metric"><div>5 ดาว</div><div class="mval" id="m-five">0</div></div>
+    </div>
+    <div style="margin-bottom:1rem; display:flex; gap:10px;">
+       <button class="chip" id="btnExport" style="background:#e6f7ef; color:var(--green);">Export CSV</button>
+       <button id="btnClear" style="margin-left:auto; color:var(--red); background:none; border:none; cursor:pointer;">🗑 ล้างข้อมูล</button>
+    </div>
+    <div id="dataList">กรุณาเข้าสู่ระบบ Admin เพื่อดูข้อมูล</div>
+  </div>
+</div>
+
+<!-- Login Modal -->
+<div id="authModal" class="modal">
+  <div class="modal-box">
+    <div style="font-size:30px; margin-bottom:10px;">🔐</div>
+    <h3>Admin Login</h3>
+    <p style="font-size:12px; color:#888; margin-bottom:15px;">รหัสผ่านสำหรับดูสรุปผล</p>
+    <input type="password" id="passInput" class="input-field" placeholder="รหัสผ่าน" style="text-align:center;">
+    <button id="authBtn" class="submit-btn">ตกลง</button>
+    <button id="closeAuth" style="background:none; border:none; margin-top:10px; color:#999; cursor:pointer;">ยกเลิก</button>
+  </div>
+</div>
+
+<!-- Global Status Bar -->
+<div class="status-bar-fixed">
+  <div id="syncStatus"><span class="dot" id="dot"></span> กำลังเชื่อมต่อ...</div>
+  <div id="fbInfo">ERV-System</div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+  import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+  import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+  // --- FIREBASE CONFIG (Updated with your project details) ---
+  const firebaseConfig = {
+    apiKey: "AIzaSyCrP6AIvPcs8ORHBdYJYfkbZJsGn-1Hkqg",
+    authDomain: "erv-survey.firebaseapp.com",
+    projectId: "erv-survey",
+    storageBucket: "erv-survey.firebasestorage.app",
+    messagingSenderId: "367636638742",
+    appId: "1:367636638742:web:2a9279b6f528204c099937",
+    measurementId: "G-XRSZX7W47Y"
+  };
+
+  // ตรวจสอบว่ารันในระบบ Canvas หรือไม่ ถ้าไม่ใช่ให้ใช้ config ด้านบน
+  const finalConfig = typeof __firebase_config !== 'undefined' 
+    ? JSON.parse(__firebase_config) 
+    : firebaseConfig;
+
+  const app = initializeApp(finalConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  
+  // กำหนด appId สำหรับจัดการ Path ข้อมูล (ให้ตรงกับโครงสร้าง Canvas/GitHub)
+  const appId = typeof __app_id !== 'undefined' ? __app_id : 'erv-survey';
+  const colPath = ['artifacts', appId, 'public', 'data', 'surveys'];
+  const colRef = collection(db, ...colPath);
+
+  let currentUser = null;
+  let cachedData = [];
+  let dashboardListener = null;
+
+  // --- AUTH INITIALIZATION ---
+  const initAuth = async () => {
+    try {
+      if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+        await signInWithCustomToken(auth, __initial_auth_token);
+      } else {
+        await signInAnonymously(auth);
+      }
+    } catch (e) {
+      console.error("Auth Error:", e);
+      document.getElementById('syncStatus').innerHTML = '<span class="dot" style="background:red"></span> เชื่อมต่อล้มเหลว';
+    }
+  };
+
+  onAuthStateChanged(auth, (user) => {
+    currentUser = user;
+    if (user) {
+      document.getElementById('dot').classList.add('online');
+      document.getElementById('syncStatus').innerHTML = '<span class="dot online"></span> เชื่อมต่อสำเร็จ ✓';
+      document.getElementById('sendBtn').disabled = false;
+      document.getElementById('sendBtn').textContent = "ส่งแบบสอบถาม ✓";
+      
+      if (document.getElementById('tab-dash').classList.contains('active')) {
+        startDashboardListener();
+      }
+    }
+  });
+
+  initAuth();
+
+  // --- SURVEY UI LOGIC ---
+  let state = { star: 0, q2: '', q3: '' };
+
+  document.querySelectorAll('.star').forEach(s => s.onclick = () => {
+    state.star = parseInt(s.dataset.v);
+    document.querySelectorAll('.star').forEach((st, i) => st.classList.toggle('on', i < state.star));
+    document.getElementById('starHint').textContent = ['','ต้องปรับปรุง','พอใช้','ปานกลาง','ดีมาก','ยอดเยี่ยม!'][state.star];
+  });
+
+  function bindChips(rowId, key) {
+    document.querySelectorAll(`#${rowId} .chip`).forEach(c => c.onclick = () => {
+      state[key] = c.dataset.v;
+      document.querySelectorAll(`#${rowId} .chip`).forEach(ch => ch.classList.remove('sel', 'sel-no'));
+      c.classList.add(c.dataset.cls || 'sel');
+    });
+  }
+  bindChips('q2-row', 'q2');
+  bindChips('q3-row', 'q3');
+
+  document.getElementById('sendBtn').onclick = async () => {
+    if (!currentUser) return alert("กรุณารอการเชื่อมต่อสักครู่...");
+    const name = document.getElementById('custName').value.trim();
+    if (!name || !state.star) return alert("กรุณากรอกชื่อและให้คะแนนดาว");
+
+    const btn = document.getElementById('sendBtn');
+    btn.disabled = true; btn.textContent = "กำลังส่งข้อมูล...";
+
+    try {
+      await addDoc(colRef, {
+        customer_name: name,
+        star: state.star,
+        q2_pro: state.q2 || 'ไม่ได้ระบุ',
+        q3_time: state.q3 || 'ไม่ได้ระบุ',
+        comment: document.getElementById('comment').value.trim(),
+        timestamp: serverTimestamp()
+      });
+      document.getElementById('surveyUI').style.display = 'none';
+      document.getElementById('thanksUI').style.display = 'block';
+    } catch (e) {
+      alert("ไม่สามารถส่งข้อมูลได้: " + e.message);
+      btn.disabled = false; btn.textContent = "ส่งแบบสอบถาม ✓";
+    }
+  };
+
+  // --- ADMIN & DASHBOARD ---
+  document.getElementById('btn-survey').onclick = () => switchTab('survey');
+  document.getElementById('btn-dash').onclick = () => document.getElementById('authModal').classList.add('active');
+  document.getElementById('closeAuth').onclick = () => document.getElementById('authModal').classList.remove('active');
+  
+  document.getElementById('authBtn').onclick = () => {
+    if (document.getElementById('passInput').value === "Coral789") {
+      document.getElementById('authModal').classList.remove('active');
+      switchTab('dash');
+      startDashboardListener();
+    } else alert("รหัสผ่านไม่ถูกต้อง");
+  };
+
+  function switchTab(t) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === `tab-${t}`));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.id === `btn-${t}`));
+  }
+
+  async function startDashboardListener() {
+    if (!auth.currentUser) await initAuth();
+    if (dashboardListener) dashboardListener();
+
+    dashboardListener = onSnapshot(colRef, (snap) => {
+      cachedData = snap.docs.map(d => ({id: d.id, ...d.data()}))
+        .sort((a,b) => {
+          const tA = a.timestamp?.seconds || 0;
+          const tB = b.timestamp?.seconds || 0;
+          return tB - tA;
+        });
+      renderDash();
+    }, (err) => {
+      console.error("Snapshot Error:", err);
+      document.getElementById('dataList').textContent = "เกิดข้อผิดพลาดในการดึงข้อมูล: " + err.message;
+    });
+  }
+
+  function renderDash() {
+    const total = cachedData.length;
+    const avg = total ? (cachedData.reduce((s,r) => s+r.star, 0)/total).toFixed(1) : '0.0';
+    const five = cachedData.filter(r => r.star === 5).length;
+
+    document.getElementById('m-count').textContent = total;
+    document.getElementById('m-avg').textContent = avg;
+    document.getElementById('m-five').textContent = five;
+
+    document.getElementById('dataList').innerHTML = cachedData.map(r => {
+      const date = r.timestamp ? new Date(r.timestamp.seconds*1000).toLocaleString('th-TH') : 'กำลังโหลด...';
+      return `
+        <div class="resp-card ${r.star >= 4 ? 'hi' : ''}">
+          <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+            <strong>${r.customer_name}</strong>
+            <span style="font-size:12px; color:#888;">${date}</span>
+          </div>
+          <div style="font-size:13px; display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
+            <div>คะแนน: ${'⭐'.repeat(r.star)}</div>
+            <div>ทีมงาน: ${r.q2_pro}</div>
+            <div>ตรงเวลา: ${r.q3_time}</div>
+          </div>
+          ${r.comment ? `<div style="margin-top:8px; font-style:italic; font-size:12px; color:#666; border-top:1px dashed #eee; padding-top:5px;">" ${r.comment} "</div>` : ''}
+        </div>
+      `;
+    }).join('') || "ยังไม่มีข้อมูลคำตอบ";
+  }
+
+  document.getElementById('btnClear').onclick = async () => {
+    if (!auth.currentUser) return;
+    if (!confirm("คุณแน่ใจหรือไม่ว่าต้องการลบข้อมูลทั้งหมด?")) return;
+    try {
+      const snap = await getDocs(colRef);
+      const deletePromises = snap.docs.map(d => deleteDoc(doc(db, ...colPath, d.id)));
+      await Promise.all(deletePromises);
+      alert("ลบข้อมูลทั้งหมดเรียบร้อยแล้ว");
+    } catch (e) {
+      alert("ลบไม่สำเร็จ: " + e.message);
+    }
+  };
+
+  document.getElementById('btnExport').onclick = () => {
+    if (!cachedData.length) return alert("ไม่มีข้อมูลให้ส่งออก");
+    const headers = ["ชื่อลูกค้า", "คะแนนดาว", "ทีมงาน", "ตรงเวลา", "ความคิดเห็น"];
+    const rows = cachedData.map(r => [r.customer_name, r.star, r.q2_pro, r.q3_time, r.comment]);
+    const csvContent = "\uFEFF" + [headers, ...rows].map(e => e.join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `survey_export_${new Date().toLocaleDateString()}.csv`;
+    link.click();
+  };
+</script>
+</body>
+</html>
