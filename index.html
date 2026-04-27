@@ -178,7 +178,10 @@
   <div class="content-wrap">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; flex-wrap:wrap; gap:15px;">
         <h2 style="font-size: 24px; color: var(--text-dark); font-weight: 700;">Performance Insights</h2>
-        <button id="btn-export" style="background: var(--coral-main); color: #fff; border:none; padding:10px 20px; border-radius:12px; font-weight:700; cursor:pointer;">Export CSV</button>
+        <div style="display: flex; gap: 10px;">
+            <button id="btn-export" style="background: var(--coral-main); color: #fff; border:none; padding:10px 20px; border-radius:12px; font-weight:700; cursor:pointer;">Export CSV</button>
+            <button id="btn-clear" style="background: #ef5350; color: #fff; border:none; padding:10px 20px; border-radius:12px; font-weight:700; cursor:pointer;">ล้างข้อมูล</button>
+        </div>
     </div>
     
     <div class="grid-metrics">
@@ -194,6 +197,7 @@
   </div>
 </div>
 
+<!-- Modal สำหรับ Login Admin -->
 <div id="modal-auth" class="overlay">
   <div class="login-box">
     <div style="font-size: 50px; margin-bottom: 20px;">🔒</div>
@@ -204,9 +208,31 @@
   </div>
 </div>
 
+<!-- Modal สำหรับยืนยันการล้างข้อมูล -->
+<div id="modal-confirm-clear" class="overlay">
+  <div class="login-box">
+    <div style="font-size: 50px; margin-bottom: 20px;">⚠️</div>
+    <h3 style="color: #ef5350;">ยืนยันการล้างข้อมูล</h3>
+    <p style="margin: 15px 0; color: var(--text-medium); font-size: 15px;">คุณแน่ใจหรือไม่ว่าต้องการลบข้อมูลแบบประเมินทั้งหมด? การกระทำนี้ไม่สามารถกู้คืนได้</p>
+    <div style="display: flex; gap: 10px; justify-content: center; margin-top: 25px;">
+        <button id="btn-cancel-clear" style="flex: 1; background:#edf2f7; color:var(--text-dark); border:none; padding:12px; border-radius:15px; font-weight:700; cursor:pointer;">ยกเลิก</button>
+        <button id="btn-confirm-clear" style="flex: 1; background:#ef5350; color:#fff; border:none; padding:12px; border-radius:15px; font-weight:700; cursor:pointer;">ลบข้อมูล</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal สำหรับแสดงข้อความแจ้งเตือน (แทน Alert) -->
+<div id="modal-alert" class="overlay">
+  <div class="login-box" style="padding: 2.5rem;">
+    <h3 id="alert-title" style="color: var(--text-dark); margin-bottom: 10px;">แจ้งเตือน</h3>
+    <p id="alert-message" style="color: var(--text-medium); margin-bottom: 25px;"></p>
+    <button id="btn-close-alert" class="btn-submit" style="padding: 12px; border-radius: 15px;">ตกลง</button>
+  </div>
+</div>
+
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-  import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+  import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
   import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
   const firebaseConfig = {
@@ -239,6 +265,14 @@
     { key: 'clean', label: 'ความสะอาดเรียบร้อยหลังการทำงาน', id: '03' },
     { key: 'punctuality', label: 'ความตรงต่อเวลานัดหมาย', id: '04' }
   ];
+
+  // ฟังก์ชันแสดง Alert แบบ Custom (แทนเบราว์เซอร์ Alert)
+  function showAlert(message, title = "แจ้งเตือน") {
+    document.getElementById('alert-title').innerText = title;
+    document.getElementById('alert-message').innerText = message;
+    document.getElementById('modal-alert').classList.add('active');
+  }
+  document.getElementById('btn-close-alert').onclick = () => document.getElementById('modal-alert').classList.remove('active');
 
   function initSurveyUI() {
     const qContainer = document.getElementById('q-container');
@@ -291,7 +325,7 @@
     } else {
       signInAnonymously(auth).catch(err => {
         console.error("Auth Error:", err);
-        alert("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณา Refresh หน้าจอ");
+        showAlert("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณา Refresh หน้าจอ", "ข้อผิดพลาด");
       });
     }
   });
@@ -299,13 +333,13 @@
   window.addEventListener('DOMContentLoaded', initSurveyUI);
 
   document.getElementById('btn-submit-all').onclick = async () => {
-    if (!isAuthReady) return alert("ระบบยังไม่พร้อม กรุณารอสักครู่...");
+    if (!isAuthReady) return showAlert("ระบบยังไม่พร้อม กรุณารอสักครู่...");
     
     const name = document.getElementById('input-cust').value.trim();
     const comment = document.getElementById('input-comment').value.trim();
     
-    if (!name) return alert("กรุณาระบุชื่อลูกค้าหรือโครงการ");
-    if (Object.values(surveyScores).some(v => v === 0)) return alert("กรุณาให้คะแนนให้ครบทุกข้อ");
+    if (!name) return showAlert("กรุณาระบุชื่อลูกค้าหรือโครงการ");
+    if (Object.values(surveyScores).some(v => v === 0)) return showAlert("กรุณาให้คะแนนให้ครบทุกข้อ");
 
     const btn = document.getElementById('btn-submit-all');
     btn.disabled = true;
@@ -324,18 +358,19 @@
       btn.disabled = false;
       btn.innerText = "ส่งความคิดเห็น";
       console.error("Submit Error:", e);
-      alert("เกิดข้อผิดพลาด: " + e.message + "\nกรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต");
+      showAlert("เกิดข้อผิดพลาด: " + e.message + "\nกรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต", "ข้อผิดพลาด");
     }
   };
 
   function startDataStream() {
     const q = query(colRef, orderBy('timestamp', 'desc'));
     unsubscribeStream = onSnapshot(q, (snap) => {
-      records = snap.docs.map(doc => doc.data());
+      // เก็บ doc.id ไว้ด้วยสำหรับใช้ในการลบข้อมูลทีหลัง
+      records = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       renderDash();
     }, (err) => {
       console.error("Snapshot Error:", err);
-      alert("ไม่สามารถดึงข้อมูลได้: " + err.message);
+      showAlert("ไม่สามารถดึงข้อมูลได้: " + err.message, "ข้อผิดพลาด");
     });
   }
 
@@ -388,10 +423,11 @@
   document.getElementById('btn-login').onclick = () => {
     if (document.getElementById('pass-field').value === 'Coral789') {
       document.getElementById('modal-auth').classList.remove('active');
+      document.getElementById('pass-field').value = ''; // เคลียร์รหัสผ่าน
       switchTab('dash');
       startDataStream();
     } else {
-      alert("รหัสผ่านไม่ถูกต้อง");
+      showAlert("รหัสผ่านไม่ถูกต้อง");
     }
   };
 
@@ -401,7 +437,7 @@
   }
 
   document.getElementById('btn-export').onclick = () => {
-    if (records.length === 0) return alert("ไม่มีข้อมูลสำหรับการ Export");
+    if (records.length === 0) return showAlert("ไม่มีข้อมูลสำหรับการ Export");
     const csv = ["\uFEFFCustomer,Overall,Professional,Clean,Punctuality,Comment"];
     records.forEach(r => {
       csv.push(`"${r.customer}",${r.overall},${r.professional},${r.clean},${r.punctuality},"${(r.comment||'').replace(/"/g, '""')}"`);
@@ -410,6 +446,43 @@
     link.href = URL.createObjectURL(new Blob([csv.join('\n')], { type: 'text/csv;charset=utf-8;' }));
     link.download = `CoralLife_Survey_Export.csv`;
     link.click();
+  };
+
+  // --- ส่วนฟังก์ชันล้างข้อมูล (Clear Data) ---
+  document.getElementById('btn-clear').onclick = () => {
+    if (records.length === 0) return showAlert("ไม่มีข้อมูลให้ลบ");
+    document.getElementById('modal-confirm-clear').classList.add('active'); // เปิดหน้าต่างยืนยัน
+  };
+
+  document.getElementById('btn-cancel-clear').onclick = () => {
+    document.getElementById('modal-confirm-clear').classList.remove('active'); // ปิดหน้าต่างยืนยัน
+  };
+
+  document.getElementById('btn-confirm-clear').onclick = async () => {
+    document.getElementById('modal-confirm-clear').classList.remove('active');
+    
+    const btn = document.getElementById('btn-clear');
+    const originalText = btn.innerText;
+    btn.innerText = "กำลังลบ...";
+    btn.disabled = true;
+
+    try {
+      // วนลูปสร้างคำสั่งลบเอกสารทุกตัวใน records
+      const deletePromises = records.map(r => 
+        deleteDoc(doc(db, "artifacts", "erv-survey", "public", "data", "surveys", r.id))
+      );
+      
+      // รอให้ลบเสร็จทั้งหมดพร้อมกัน
+      await Promise.all(deletePromises);
+      showAlert("ล้างข้อมูลในระบบเรียบร้อยแล้ว", "สำเร็จ");
+
+    } catch (error) {
+      console.error("Delete Error:", error);
+      showAlert("เกิดข้อผิดพลาดในการลบข้อมูล: " + error.message, "ข้อผิดพลาด");
+    } finally {
+      btn.innerText = originalText;
+      btn.disabled = false;
+    }
   };
 </script>
 </body>
