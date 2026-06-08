@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th">
 <head>
 <meta charset="UTF-8">
@@ -249,8 +249,8 @@
   const db = getFirestore(app);
   const auth = getAuth(app);
   
-  // ปรับ Path ให้ตรงตาม Rules: /artifacts/erv-survey/public/data/surveys
-  const colRef = collection(db, "artifacts", "erv-survey", "public", "data", "surveys");
+  
+  const colRef = collection(db, "surveys");
 
   let surveyScores = { overall: 0, professional: 0, clean: 0, punctuality: 0 };
   let records = [];
@@ -469,7 +469,7 @@
     try {
       // วนลูปสร้างคำสั่งลบเอกสารทุกตัวใน records
       const deletePromises = records.map(r => 
-        deleteDoc(doc(db, "artifacts", "erv-survey", "public", "data", "surveys", r.id))
+        deleteDoc(doc(db, "surveys", r.id))
       );
       
       // รอให้ลบเสร็จทั้งหมดพร้อมกัน
@@ -487,3 +487,5 @@
 </script>
 </body>
 </html>
+
+
